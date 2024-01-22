@@ -1,0 +1,186 @@
+; Name: LUONG THANH VY (2151280), finished in 22/01/2024
+
+; Task: Input 3 numbers to R0, R1 and R3. Find the Max and Min numbers then store (LOAD) them into R3, R4
+; Instruction unclear: I assume that we don't have to always keep the 3 inputed numbers in R0,R1,R2, but instead we just use LABELs X,Y,Z, Max, Min to store data and Load it to indicated Registers at the end.
+
+;The Algorithm:
+; - Assume the first int is MAX, then compare this max value to other integers. If larger, the MAX value equal the larger integer. Similarly, we're comparing for smaller value to find MIN
+; - I use GETC + OUT instead of IN to remove the <Input a character> message.
+; - For multiple-digit input, if more integer(digit) inputed to console, then multiply the previous integer by 10 and add the latest input integer and store it. If the next character is newline (ASCII = 10) then EXIT inputing. If the the input is not integer (ASCII < 48,  ASCII > 57) then invalid messgage will pop up, prompting the user to restart the program.
+; - The lengthy code exceed the offset9 to use declared variables, so I declared the variables in the middle of the code, to prevent this.
+; - For printing output, since the largest number in LC3 is 65535 or 32767 (if sign bit included), I devided desired numbers by 10000, 1000, 100, 10 and printing out the quotient subsequentally, the remainder of the division is used for the next division
+
+
+.ORIG x3000
+              LEA R0, msg
+              PUTS
+              LEA R0, msg1      ; Prompting for input
+              PUTS
+              JSR INPUT         ; Return multiple-digits input (R6)
+              ST  R6, tmp       ; Save X, R0 is needed for I/O 
+
+       
+              LEA R0, msg2       
+              PUTS
+              JSR INPUT
+              ADD R1, R6, #0    ; R1 = Y
+
+
+              LEA R0, msg3        
+              PUTS
+              JSR INPUT
+              ADD R2, R6, #0    ; R2 = Z
+
+              LD  R0, tmp       ; R0 = X
+              JSR MAX_MIN
+MAIN          LD  R3, Max       ; Labeled MAIN for returning
+              LD  R4, Min
+              LEA R0, msg_MAX   ; "The MAX is..."
+              PUTS
+              ADD R6, R3, #0
+              JSR BCD           ; Printing each digits
+              AND R0, R0, #0
+              ADD R0, R0, #10   ; Newline
+              OUT
+              LEA R0, msg_MIN   ; "The MIN is..."
+              PUTS 
+              ADD R6, R4, #0
+              JSR BCD
+              LD  R0, tmp       ; Restore R0 to X as indicated
+              HALT
+
+msg     .STRINGZ "Please enter unsigned integer (0 to 32767).\n"
+msg1    .STRINGZ "Enter the first integer:  X = "
+msg2    .STRINGZ "Enter the second integer: Y = "
+msg3    .STRINGZ "Enter the third integer:  Z = "
+msg_MAX .STRINGZ "The MAX number in the list is: "
+msg_MIN .STRINGZ "The MIN number in the list is: "
+Max        .BLKW x0001
+Min        .BLKW x0001
+tmp        .BLKW x0001
+SAVE       .BLKW x0001
+SAVE_2     .BLKW x0001
+NOT_EXTEN .FILL x0000
+ASCII     .FILL #-48
+TEN       .FILL #10
+HUNDRED   .FILL #100
+THOUSAND  .FILL #1000
+VANJ      .FILL #10000
+
+INPUT         ST  R7, SAVE        ; Save initial return Address
+              AND R6, R6, #0      
+LOOP_INPUT    GETC
+              OUT
+              ADD R5, R0, #0      ; R5 = R0
+              ADD R5, R5, #-10    ; check for newline character
+              BRz EXIT
+              LD  R4, ASCII       ; Check for ASCII < 48
+              ADD R5, R0, #0
+              ADD R5, R5, R4
+              BRn INVALID
+              ADD R5, R0, #0   
+              ADD R4, R4, #-9     ; Check for ASCII >57   
+              ADD R5, R5, R4      
+              BRp INVALID         ; Invalid message
+            
+              LD  R5, ASCII        
+              ADD R0, R0, R5
+              JSR X10_R6          ; 10 x R6, initially R6 = 0
+              ADD R6, R6, R0
+              BRnzp LOOP_INPUT 
+
+EXIT          LD  R7, SAVE   
+              JMP R7          
+   
+INVALID       AND R0, R0, #0 
+              ADD R0, R0, #10      ; Newline
+              OUT
+              LEA R0, invalid
+              PUTS
+              HALT
+
+X10_R6        ADD R5, R6, #0
+              AND R6, R6, #0
+              LD  R4, TEN
+LOOP_MUL      ADD R6, R6, R5
+              ADD R4, R4, #-1
+              BRp LOOP_MUL
+              RET              
+
+MAX_MIN       ADD R5, R0, #0      ; Load X to R5
+              ST  R5, Max         ; Assume X = Max
+              ST  R5, Min         ; Assume X = Min
+              ADD R5, R1, #0      ; Load Y
+              JSR LOOP_MAX        ; Compare MAX
+              JSR LOOP_MIN        ; Compare MIN
+              ADD R5, R2, #0      ; Load Z
+              JSR LOOP_MAX
+              JSR LOOP_MIN
+              JSR MAIN              
+
+LOOP_MAX      LD  R3, Max         ;Loop start: Compare R3(MAX) vs R5
+              ADD R6, R5, #0      ; R6 as temp
+              NOT R6, R6          
+              ADD R6, R6, #1      
+              ADD R3, R3, R6      ; R3 = R3 - R5 (or R6)
+              BRn New_MAX         ; If R3 < R5 => Max = R5
+              RET 
+New_MAX       ST  R5, Max
+              RET
+                         
+LOOP_MIN      LD  R4, Min         ; Compare R4(MIN) vs R5
+              ADD R6, R5, #0      ; R6 as temp
+              NOT R4, R4
+              ADD R4, R4, #1
+              ADD R6, R6, R4
+              BRn New_MIN
+              RET
+New_MIN       ST  R5, Min
+              RET 
+
+BCD           ST  R7, SAVE        ;RET caused bug for unknowm reason
+              LD  R5, NOT_EXTEN      
+              AND R5, R5, #0      ; NOT_EXTEN initially = 0
+              ST  R5, NOT_EXTEN
+              LD  R5, VANJ        ; 10000 division
+              JSR PRINT_BCD
+              LD  R5, THOUSAND    ; 1000 division
+              JSR PRINT_BCD
+              LD  R5, HUNDRED     ; 100 division
+              JSR PRINT_BCD
+              LD  R5, TEN         ; 10 division
+              JSR PRINT_BCD
+              ADD R0, R6, R5      ; The last remainder should <10
+              OUT
+; While debugging, RET caused R7 to changed to address of RET and stucked in loop for unknown reason, so I used this method.
+              LD R7, SAVE         
+              JMP R7             
+              
+PRINT_BCD     ST R7, SAVE_2
+              NOT R5, R5
+              ADD R5, R5, #1
+              AND R0, R0, #0
+PRINT_LOOP    ST  R6, tmp
+              ADD R0, R0, #1
+              ADD R6, R6, R5
+              BRzp PRINT_LOOP
+              ADD R0, R0, #-1
+              LD  R6, tmp
+              LD  R5, NOT_EXTEN     
+              ADD R5, R5, R0        ;NOT_EXTEN = NOT_EXTEN + digit
+              BRnp PRINT     
+;If sum of all digits != 0 then start printing (Remove extended 0) 
+              LD R7, SAVE_2
+              JMP R7
+PRINT         ST  R5, NOT_EXTEN     ;NOT_EXTEN now !=0
+              LD  R5, ASCII
+              NOT R5, R5
+              ADD R5, R5, #1
+              ADD R0, R0, R5
+              OUT
+              LD  R7, SAVE_2      ;RET caused Bug for unknown reason
+              JMP R7                         
+
+invalid .STRINGZ "Invalid input, please restart program and enter integer numbers."
+
+.END
