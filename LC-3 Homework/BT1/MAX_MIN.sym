@@ -1,0 +1,36 @@
+//Symbol Name		Page Address
+//----------------	------------
+//	ASCII                   30EF
+//	BCD                     3133
+//	EXIT                    3108
+//	HUNDRED                 30F1
+//	INPUT                   30F4
+//	INVALID                 310A
+//	LOOP_INPUT              30F6
+//	LOOP_MAX                3121
+//	LOOP_MIN                312A
+//	LOOP_MUL                3113
+//	MAIN                    3010
+//	MAX_MIN                 3117
+//	Max                     30E9
+//	Min                     30EA
+//	NOT_EXTEN               30EE
+//	New_MAX                 3128
+//	New_MIN                 3131
+//	PRINT                   3152
+//	PRINT_BCD               3143
+//	PRINT_LOOP              3147
+//	SAVE                    30EC
+//	SAVE_2                  30ED
+//	TEN                     30F0
+//	THOUSAND                30F2
+//	VANJ                    30F3
+//	X10_R6                  3110
+//	invalid                 315A
+//	msg                     301F
+//	msg1                    304C
+//	msg2                    306B
+//	msg3                    308A
+//	msg_MAX                 30A9
+//	msg_MIN                 30C9
+//	tmp                     30EB
