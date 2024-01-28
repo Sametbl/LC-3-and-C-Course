@@ -1,0 +1,27 @@
+The Problem: The LC-3 has no Divide instruction. A programmer needing to divide two numbers would have to write a routine to handle it. Show the systematic decomposition of the process
+of dividing two integers (NEGATIVE and POSITIVE) . Write an LC-3 machine language program starting at 
+locaiton x3000 that divides the number in memory location x4000 by the number in memory
+location x4001 and stores the quotient at x5000 and the remainder at x5001
+
+===================== My approach to the problem ====================
+# Theory and Algorithm #
+1. Algorithm for Division in LC-3
+- Division is a loop of substraction, the number of times loop repeated before the subtration result in negative numbers is the Quotient and the remaining number (smaller than divisor) is the Remainder.
+- If division involves negative numbers, this approach is still valid if we take absolute value of these numbers and apply the "sign rule" at the end.
+- The "sign rule" : Same signs - the answer is positive   ;    Different signs - the answer is negative
+
+2. Size of integers
+- Registers in LC-3 have size of 16-bit, the maxinum signed number LC-3 can represent is -(2^15 - 1) to 2^15 or −32,768 to 32,767, so registers in LC-3 only capable of performing arithmetic operations
+in this range.
+
+3. Inputing multiple-digit number
+- Inputing process is done by looped subroutine that breaks when the inputed character is newline character (ASCII-10) or non-integer character.
+- We store the first inputed integer in a register (intially 0), if another integer inputed to the console, we multiply the current value of that register by 10 and add the latest intputed integer.
+Example: 3 = 0 x10 +3    ;   35 = 3 x10 + 5      ; 352 = (3 x10 + 5) x10 + 2      ;   3528 = [(3 x10 +5) x10 + 2] x10 + 8  
+- If '-' character is inputed first, we create a flag with temporary varible to indicated the inputing the number is negative, which give us data to apply the "sign rule", we then do a 2's complement inversion
+of the number later on when the ansnwer is negative.
+- While inputing, inputed non-integer characters will output an error message, prompting user to restart the program.
+
+4. Outputing multiple-digit number (answer)
+- Outputing is done by a subroutine that output each digit of the number from left to right
+- The largest possible digit in LC-3 is tenth 
