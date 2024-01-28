@@ -8,20 +8,34 @@ location x4001 and stores the quotient at x5000 and the remainder at x5001
 1. Algorithm for Division in LC-3
 - Division is a loop of substraction, the number of times loop repeated before the subtration result in negative numbers is the Quotient and the remaining number (smaller than divisor) is the Remainder.
 - If division involves negative numbers, this approach is still valid if we take absolute value of these numbers and apply the "sign rule" at the end.
-- The "sign rule" : Same signs - the answer is positive   ;    Different signs - the answer is negative
+- The "sign rule" : Same signs - the answer is Positive   ;    Different signs - the answer is Negative
 
 2. Size of integers
-- Registers in LC-3 have size of 16-bit, the maxinum signed number LC-3 can represent is -(2^15 - 1) to 2^15 or −32,768 to 32,767, so registers in LC-3 only capable of performing arithmetic operations
+- Registers in LC-3 have size of 16-bit, the maxinum signed number LC-3 can represents is -(2^15 - 1) to 2^15 || −32,768 to 32,767, so registers in LC-3 only capable of performing arithmetic operations
 in this range.
 
 3. Inputing multiple-digit number
 - Inputing process is done by looped subroutine that breaks when the inputed character is newline character (ASCII-10) or non-integer character.
-- We store the first inputed integer in a register (intially 0), if another integer inputed to the console, we multiply the current value of that register by 10 and add the latest intputed integer.
-Example: 3 = 0 x10 +3    ;   35 = 3 x10 + 5      ; 352 = (3 x10 + 5) x10 + 2      ;   3528 = [(3 x10 +5) x10 + 2] x10 + 8  
-- If '-' character is inputed first, we create a flag with temporary varible to indicated the inputing the number is negative, which give us data to apply the "sign rule", we then do a 2's complement inversion
-of the number later on when the ansnwer is negative.
+- The loop: We store the first inputed integer in a register (intially 0), if another integer inputed to the console, we multiply the current value of that register by 10 and add the latest intputed integer.
+Example: 3     = 0 x10 +3    
+         35    = 3 x10 + 5     
+         352   = (3 x10 + 5) x10 + 2    
+         3528  = [(3 x10 +5) x10 + 2] x10 + 8  
+         35289 = { [(3 x10 +5) x10 + 2] x10 + 8 } x10 + 9
+- If '-' character is inputed first, we create a flag with temporary variable to indicated the inputing the number is negative, which give us data to apply the "sign rule", we then do a 2's complement inversion
+of the number later on when the ansnwer is Negative.
 - While inputing, inputed non-integer characters will output an error message, prompting user to restart the program.
 
 4. Outputing multiple-digit number (answer)
 - Outputing is done by a subroutine that output each digit of the number from left to right
-- The largest possible digit in LC-3 is tenth 
+- The largest possible digit in LC-3 is tens of thousands, each digit of number is print out by outputing the Quotient result from the divsion of that number by 10000, 1000, 100, 10 consecutively, the next
+division is perfomed using the Remainder of previous division.
+- If the flag indicating signed number is true, first print out '-' character
+Exmaple: 35289 : 10000 = 3 , remains 5289                // Print out : '3'
+         5289  : 1000  = 5 , remains 289                 // Print out : '5'
+         289   : 100   = 2 , remains 89                  // Print out : '2'
+         89    : 10    = 8 , remains 9                   // Print out ; '8'    then Print out : '9'
+ ==>     On console: 35289
+
+
+         
