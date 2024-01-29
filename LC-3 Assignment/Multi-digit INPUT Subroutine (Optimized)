@@ -1,8 +1,8 @@
 ; We tried to optimized the Subroutine to uses the least Registers as possible.
 ; We use GETC and OUT, instead of IN (trap_vector) to remove the <Input a character> messgae of IN trap vector. For aesthetic reason.
 ; Register involve: R0, R6 and R7 (RET)
-; R6, is the Output integer
-; 
+; Because there are some JSR instructions in this Subroutine, R7 is affected. Consider save return Address to "SAVE" label.
+; R6 is the Output integer
 
 INPUT       GETC      
             OUT
@@ -10,19 +10,25 @@ INPUT       GETC
             ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
             BRz EXIT           ; If true, stop inputing and exit
             JSR X10_R6         ; R6 = R6 x10
-            LD  R0, tmp        ; Load temporary saved R0
+
+            LD  R0, tmp        ; Load temporary saved input number(ASCII) to R0
             ST  R6, tmp        ; Temporary save R6
             LD  R6, De_ASCII   ; R6 = -48 
             ADD R0, R0, R6     ; R0 = lastest digit  
-            LD  R6, tmp        ; Return value of R6 after it served other purpose
-            ADD R6, R6, R0     ; Result after each INPUT loop: R6 = (R6 x10) +  R0
+            LD  R6, tmp        ; Return R6
+            ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
             JSR INPUT          ; do INPUT loop
 
-X10_R6      ADD R0, R6, #0     ; R0 = R6 = a,   a is initial value of R6
+X10_R6      ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
+            ST  R0, tmp2
             AND R6, R6, #0     ; R6 = 0   
-            LD  R4, TEN
-XLOOP       ADD R6, R6, R0     ; R6 = R6 + a
-            ADD R4, R4, #-1    
+            LD  R0, TEN        ; R0 = 10
+-------------------------------------- Multiplication loop -------------------------
+XLOOP       ST  R0, tmp3
+            LD  R0, tmp2       ; tmp2 = a
+            ADD R6, R6, R0     ; R6 = R6 + a
+            LD  R0, tmp3       ; tmp3 initally = 10 
+            ADD R0, R0, #-1    ; tmp3--    
             BRp XLOOP          ; While R4 > 0, keeping adding 'a' to R6
             RET                ; else Return
             
@@ -32,4 +38,5 @@ EXIT        LD  R7, SAVE
 tmp         .BLKW x0001
 tmp1        .BLKW x0001
 tmp2        .BLKW x0001  
+TEN         .FILL x000A
 De_ASCII    .FILL #-48
