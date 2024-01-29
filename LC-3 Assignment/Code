@@ -1,0 +1,99 @@
+;The result is always num1 / num2   (NOT num2 /num1)
+
+.ORIG x3000
+            LEA R0, in1        ; Input the first number
+            PUTS
+            LEA R7, #2         ; Save return Address
+            ST  R7, SAVE       ; #0
+            JSR INPUT          ; #1
+            STI R6, num1       ; Store in x4000
+            LD  R0, TEN        ; Newline
+            OUT
+         
+            LEA R0, in2        ; Input the second number
+            PUTS
+            AND R6, R6, #0
+            LEA R7, #2
+            ST  R7, SAVE
+            JSR INPUT
+            STI R6, num2       ; Store in x4001
+            LD  R0, TEN        ; Newline
+            OUT
+
+            LDI R1, num1
+            LDI R2, num2  
+;------------------------------------------------------------------ Computation
+            JSR DIVISION       ; R4 = Quotient , R5 = Remainder
+            LD  R0, ASCII
+            NOT R0, R0
+            ADD R0, R0, #1     ; R0 = -R6 = 48
+            ADD R4, R4, R0     ; R4 = R4 + 48  (ASCII-ed)
+            ADD R5, R5, R0     ; Similarly
+            
+            LEA R0, QUOTI
+            PUTS
+            ADD R0, R4, #0     ; R0 = R4 = Quotient
+            OUT
+            LD R0, TEN
+            OUT
+            LEA R0, REMAI
+            PUTS
+            ADD R0, R5, #0     ; R0 = R5 = Remainder
+            OUT
+            HALT
+;--------------------------------------------------------------------Function Declaration and Definition
+DIVISION    NOT R0, R2
+            ADD R0, R0, #1     ; 2's complement R0 = -R2
+            ADD R3, R1, #0     ; R3 = R1
+    LOOP    ADD R5, R3, #0     ; Save the previous value of R3 to R5
+            ADD R4, R4, #1     ; R4 = number of substraction
+            ADD R3, R3, R0     ; R3 = R3 - R2  
+            BRzp LOOP          ; if R3 - R2 >=0
+
+            ADD R4, R4, #-1    ; Eliminate the first quotient count
+            STI R4, QUOTI
+            STI R5, REMAIN
+            RET
+
+INPUT       GETC      
+            OUT
+            ST R0, tmp         ; Temporary save R0
+            ADD R0, R0, #-10   ; Check for newline character
+            BRz EXIT           ; If true, stop inputing
+            JSR X10_R6         ; R6 = R6 x10
+            LD R0, tmp        
+            LD R5, ASCII
+            ADD R0, R0, R5     ; R0 = lastest digit       
+            ADD R6, R6, R0     
+            JSR INPUT          ; R6 = (R6 x10) +  R0
+
+X10_R6      ADD R5, R6 ,#0
+            AND R6, R6, #0
+            LD  R4, TEN
+XLOOP       ADD R6, R6, R5
+            ADD R4, R4, #-1
+            BRp XLOOP
+            RET
+            
+EXIT        LD  R7, SAVE 
+            RET
+
+OUTPUT      
+
+
+;------------------------ Variable Initialization
+   TEN     .FILL x000A        
+   ASCII    .FILL #-48                      
+   QUOTI   .FILL x5000                      ; Address of Quotient
+   REMAIN  .FILL x5001                      ; Address of Remainder
+   num1    .FILL x4000                      ; Address of integer 1
+   num2    .FILL x4001                      ; Address of integer 2 -  num1 / num2
+   tmp     .BLKW x0001
+   SAVE    .BLKW x0001                      ; To save return Address
+   in1 .STRINGZ "Please input the 1st Decimal Number: "
+   in2 .STRINGZ "Please input the 2nd Decimal Number: "
+   QUOTI .STRINGZ "The quotient is: "
+   REMAI .STRINGZ "The Remainder is: "
+
+
+.END
