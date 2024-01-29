@@ -16,6 +16,8 @@ The Problem: The LC-3 has no Divide instruction. A programmer needing to divide 
 2. Size of integers
 - Registers in LC-3 have size of 16-bit, the maxinum signed number LC-3 can represents is -(2^15 - 1) to 2^15 || −32,768 to 32,767, so registers in LC-3 only capable of performing arithmetic operations in this range.
 
+
+---------------------------- OPTIONAL, NOT REQUIRED IN THE PROBLEM ------------------------ 
 3. Inputing multiple-digit number
 - Inputing process is done by looped subroutine that breaks when the inputed character is newline character (ASCII-10) or non-integer character.
 - The loop: We store the first inputed integer in a register (intially 0), if another integer inputed to the console, we multiply the current value of that register by 10 and add the latest intputed integer.
