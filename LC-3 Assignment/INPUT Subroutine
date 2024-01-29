@@ -1,0 +1,25 @@
+; R4, R5 are used in the process. Consider save data stored in these Registers before JUMP to this Subroutine
+; R6, is the Output integer
+
+INPUT       GETC      
+            OUT
+            ST R0, tmp         ; Temporary save R0
+            ADD R0, R0, #-10   ; Check for newline character
+            BRz EXIT           ; If true, stop inputing
+            JSR X10_R6         ; R6 = R6 x10
+            LD R0, tmp        
+            LD R5, ASCII
+            ADD R0, R0, R5     ; R0 = lastest digit       
+            ADD R6, R6, R0     
+            JSR INPUT          ; R6 = (R6 x10) +  R0
+
+X10_R6      ADD R5, R6 ,#0
+            AND R6, R6, #0
+            LD  R4, TEN
+XLOOP       ADD R6, R6, R5
+            ADD R4, R4, #-1
+            BRp XLOOP
+            RET
+            
+EXIT        LD  R7, SAVE 
+            RET
