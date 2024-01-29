@@ -1,5 +1,7 @@
+; We use GETC and OUT, instead of IN (trap_vector) to remove the <Input a character> messgae of IN trap vector. For aesthetic reason.
 ; Registers involve: R0, R4, R5, R6, R7(RET)
 ; JSR instruction is uses in this Subroutine, save the return Address to "SAVE" label.
+; R6 is Output integer
 
 INPUT       GETC      
             OUT
