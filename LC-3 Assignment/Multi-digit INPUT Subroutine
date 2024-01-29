@@ -1,0 +1,29 @@
+; Registers involve: R0, R4, R5, R6, R7(RET)
+; JSR instruction is uses in this Subroutine, save the return Address to "SAVE" label.
+
+INPUT       GETC      
+            OUT
+            ST R0, tmp         ; Temporary save R0
+            ADD R0, R0, #-10   ; Check for newline character (Enter)
+            BRz EXIT           ; If true, stop inputing
+            JSR X10_R6         ; R6 = R6 x10
+            LD R0, tmp        
+            LD R5, De_ASCII    ; R5 = -48
+            ADD R0, R0, R5     ; R0 = lastest digit       
+            ADD R6, R6, R0     ; Each loop: R6 = (R6 x10) +  R0
+            JSR INPUT        
+
+X10_R6      ADD R5, R6 ,#0     ; R5 = initial value of R6 = a
+            AND R6, R6, #0     ; R6 = 0
+            LD  R4, TEN        ; R4 = 10
+XLOOP       ADD R6, R6, R5     ; R6 = R6 + a
+            ADD R4, R4, #-1    ; R4--
+            BRp XLOOP
+            RET
+            
+EXIT        LD  R7, SAVE 
+            RET
+
+De_ASCII    .FILL #-48
+TEN         .FILL x000A
+tmp         .BLKW x0001
