@@ -15,17 +15,20 @@ OUTPUT        ST  R7, SAVE
               ADD R0, R6, R5     ; R6 should < 10 at this point, and R5 still equal to -48
               OUT                ; PRINT OUT the last digit
               LD  R7, SAVE       ; RETURN
-              JMP                  
+              JMP R7                 
               
 
 PRINT         AND R0, R0, #0     ; R0 = 0
               NOT R5, R5
               ADD R5, R5, #1     ; R5 = -R5
 PRINT++       ADD R0, R0, #1     ; Remainder count
+              ST  R6, tmp        ; Save R6 to restore it later
               ADD R6, R6, R5     ; R6 = R6 - R5
-              BRnp PRINT++       ; If R6 >= 0, continue subtracting
+              BRzp PRINT++       ; If R6 >= 0, continue subtracting
+
+              LD  R6, tmp        ; Restore last value of R6 before it results in negative
               ADD R0, R0, #-1    ; Eliminate the last Remainder count that result in negative
-              LD  R5, ASCII      ; R5 = -48
+              LD  R5, De_ASCII   ; R5 = -48
               NOT R5, R5
               ADD R5, R5, #1     ; R5 = 48
               ADD R0, R0, R5     
@@ -34,9 +37,9 @@ PRINT++       ADD R0, R0, #1     ; Remainder count
 
 
 
-
+tmp       .BLKW x0001
 SAVE      .BLKW x0001
-ASCII     .FILL #-48
+De_ASCII  .FILL #-48
 TEN       .FILL #10
 HUNDRED   .FILL #100
 THOUSAND  .FILL #1000
