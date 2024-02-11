@@ -1,10 +1,11 @@
 ; We tried to optimized the Subroutine to uses the least Registers as possible.
 ; We use GETC and OUT, instead of IN (trap_vector) to remove the <Input a character> messgae of IN trap vector. For aesthetic reason.
-; Register involve: R0, R6 and R7 (RET)
-; Because there are some JSR instructions in this Subroutine, R7 is affected. Consider save return Address to "SAVE" label.
+; Registers involve: R0, R6 and R7 (RET)
+; Because there are some JSR instructions in this Subroutine, address stored R7 is modified, we have to save return Address to s label "SAVE".
 ; R6 is the Output integer
 
-INPUT       GETC      
+INPUT       ST  R7, SAVE       ; Store return address
+MAIN_LOOP   GETC      
             OUT
             ST  R0, tmp        ; Temporary save R0, to check for Newline character
             ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
@@ -17,14 +18,14 @@ INPUT       GETC
             ADD R0, R0, R6     ; R0 = lastest digit  
             LD  R6, tmp        ; Return R6
             ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
-            JSR INPUT          ; do INPUT loop
+            JSR MAIN_LOOP      ; do INPUT loop
 
 X10_R6      ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
             ST  R0, tmp2
             AND R6, R6, #0     ; R6 = 0   
             LD  R0, TEN        ; R0 = 10
 -------------------------------------- Multiplication loop -------------------------
-XLOOP       ST  R0, tmp3
+X_LOOP       ST  R0, tmp3
             LD  R0, tmp2       ; tmp2 = a
             ADD R6, R6, R0     ; R6 = R6 + a
             LD  R0, tmp3       ; tmp3 initally = 10 
@@ -38,5 +39,6 @@ EXIT        LD  R7, SAVE
 tmp         .BLKW x0001
 tmp1        .BLKW x0001
 tmp2        .BLKW x0001  
+SAVE        .BLKW x0001
 TEN         .FILL x000A
 De_ASCII    .FILL #-48
