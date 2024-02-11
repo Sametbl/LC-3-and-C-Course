@@ -1,7 +1,7 @@
-Registers used: R0, R5, R6
-R6 stores the value that needed to print out and R5 stores the divisors
+; Registers used: R0, R5, R6
+; R6 stores the value that needed to print out and R5 stores the divisors
 
-///// R6 = input num
+; R6 = input num
 
 OUTPUT        ST  R7, SAVE
               LD  R5, VANJ
