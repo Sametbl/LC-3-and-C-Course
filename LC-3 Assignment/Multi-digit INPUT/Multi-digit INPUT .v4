@@ -1,0 +1,62 @@
+; ================= Version-4 modification ===================
+; This version allows Negative input numbers, which is done by entering '-' character (the only allowed non-numberic number)  
+
+; ================ Important Notes ==================
+; We use GETC and OUT, instead of IN (trap_vector) to remove the <Input a character> messgae of IN trap vector. For aesthetic reason.
+; Registers involve: R0, R6 and R7 (RET)
+; Because there are some JSR instructions in this Subroutine, address stored R7 is modified, we have to save return Address to s label "SAVE".
+; R6 is the Output integer
+
+INPUT       ST  R7, SAVE       ; Store return address
+MAIN_LOOP   GETC      
+            OUT
+            ST  R0, tmp        ; Temporary save R0, to check for Newline character
+            ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
+            BRz EXIT           ; If true, stop inputing and exit
+
+            LD  R7, tmp        ; R7 = inputed character
+            LD  R0, De_ASCII   ; chech if 47 < R0 < 58
+            ADD R0, R7, R0     ; R0 = R7 - 48
+            BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
+            ADD R0, R0, #-9    ; R0 = (R7 - 48) - 10
+            BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
+    
+            JSR X10_R6         ; R6 = R6 x10
+
+            LD  R0, tmp        ; Load temporary saved input number(ASCII) to R0
+            ST  R6, tmp        ; Temporary save R6
+            LD  R6, De_ASCII   ; R6 = -48 
+            ADD R0, R0, R6     ; R0 = lastest digit  
+            LD  R6, tmp        ; Return R6
+            ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
+            JSR MAIN_LOOP      ; do INPUT loop
+
+X10_R6      ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
+            ST  R0, tmp2
+            AND R6, R6, #0     ; R6 = 0   
+            LD  R0, TEN        ; R0 = 10
+-------------------------------------- Multiplication loop -------------------------
+X_LOOP      ST  R0, tmp3
+            LD  R0, tmp2       ; tmp2 = a
+            ADD R6, R6, R0     ; R6 = R6 + a
+            LD  R0, tmp3       ; tmp3 initally = 10 
+            ADD R0, R0, #-1    ; tmp3--    
+            BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
+            RET                ; else Return
+            
+EXIT        LD  R7, SAVE
+            JMP R7
+              
+ERROR       LD R0, TEN
+            OUT
+            LEA R0, error
+            PUTS
+            HALT
+              
+error       .STRINGZ "Invalid input, program ended."              
+tmp         .BLKW x0001
+tmp2        .BLKW x0001  
+tmp3        .BLKW x0001
+SAVE        .BLKW x0001
+TEN         .FILL x000A
+De_ASCII    .FILL #-48
