@@ -1,5 +1,6 @@
 ; ============== Version-2 modification ==============
 ; We tried to optimized the Subroutine to uses the least Registers as possible.
+; The last version used up to 5 Registers, this version only require only 3.
 
 ; ============== Important Note ===============
 ; We use GETC and OUT, instead of IN (trap_vector) to remove the <Input a character> messgae of IN trap vector. For aesthetic reason.
