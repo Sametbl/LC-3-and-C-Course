@@ -25,20 +25,20 @@ X10_R6      ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
             AND R6, R6, #0     ; R6 = 0   
             LD  R0, TEN        ; R0 = 10
 -------------------------------------- Multiplication loop -------------------------
-X_LOOP       ST  R0, tmp3
+X_LOOP      ST  R0, tmp3
             LD  R0, tmp2       ; tmp2 = a
             ADD R6, R6, R0     ; R6 = R6 + a
             LD  R0, tmp3       ; tmp3 initally = 10 
             ADD R0, R0, #-1    ; tmp3--    
-            BRp XLOOP          ; While R4 > 0, keeping adding 'a' to R6
+            BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
             RET                ; else Return
             
 EXIT        LD  R7, SAVE
-            RET
+            JMP R7
 
 tmp         .BLKW x0001
-tmp1        .BLKW x0001
 tmp2        .BLKW x0001  
+tmp3        .BLKW x0001
 SAVE        .BLKW x0001
 TEN         .FILL x000A
 De_ASCII    .FILL #-48
