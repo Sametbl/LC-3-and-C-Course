@@ -1,0 +1,24 @@
+EACH VERSION MODIFICATION
+
+=========== Version 1 ===========
+- Multiple digit input ( 0 to 65536 )
+- Used 5 Registers for the task (R0, R4, R5, R6, R6)
+- Cannot input Negative number
+
+=========== Version 2 ===========
+- Multiple digit input ( 0 to 65535 )
+- Used only 3 Registers (R0, R6, R7)
+- Cannot input Negative number
+
+=========== Version 3 ===========
+- Multiple digit input ( 0 to 65535 )
+- Used 3 Resgisters (R0, R6, R7)
+- Check for non-numberic characters and display error messasge if detected.
+- Cannot input Negative number
+
+=========== Version 4 ===========
+- Multiple digit input ( −32768 to 32767 )
+- Used
+- Allowing NEGATIVE input number
+- Check for non-numberic characters and display error message if detected
+(except for '-' character if it is the first inputed character and not inputed more than twice)
