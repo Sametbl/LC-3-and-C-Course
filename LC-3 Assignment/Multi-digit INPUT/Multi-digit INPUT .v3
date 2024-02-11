@@ -1,11 +1,11 @@
 ; ================= Version-3 modification ===================
 ; This version checked for non-numberic characters of each inputed digit and promt users to restart the program if true.
 ; The algorithm: for each digit inputed, check if it's < 48 and > 58, the input is invalid if true.
-                          47 < num < 58
-             ---->    -1 < (num - 48) < 10      or       0 <= (num - 48) <= 9
+                          47 < char < 58
+             ---->    -1 < (char - 48) < 10      or       0 <= (char - 48) <= 9
 
-First, check if num - 48 < 0 
-Then,  check if (num - 48) - 9 > 0
+First, check if  char - 48 < 0 
+Then,  check if (char - 48) - 9 > 0
 
 
 ; ================ Important Notes ==================
