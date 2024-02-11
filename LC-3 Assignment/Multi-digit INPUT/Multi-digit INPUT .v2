@@ -1,4 +1,7 @@
-; Version modification: We tried to optimized the Subroutine to uses the least Registers as possible.
+; ============== Version modification ==============
+; We tried to optimized the Subroutine to uses the least Registers as possible.
+
+; ============== Important Note ===============
 ; We use GETC and OUT, instead of IN (trap_vector) to remove the <Input a character> messgae of IN trap vector. For aesthetic reason.
 ; Registers involve: R0, R6 and R7 (RET)
 ; Because there are some JSR instructions in this Subroutine, address stored R7 is modified, we have to save return Address to s label "SAVE".
