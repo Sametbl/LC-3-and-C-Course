@@ -1,4 +1,7 @@
-The Problem: The LC-3 has no Divide instruction. A programmer needing to divide two numbers would have to write a routine to handle it. Show the systematic decomposition of the process of dividing two integers (NEGATIVE and POSITIVE) . Write an LC-3 machine language program starting at locaiton x3000 that divides the number in memory location x4000 by the number in memory location x4001 and stores the quotient at x5000 and the remainder at x5001
+====================== The Problem ================
+The LC-3 has no Divide instruction. A programmer needing to divide two numbers would have to write a routine to handle it.
+Show the systematic decomposition of the process of dividing two integers (NEGATIVE and POSITIVE). 
+Write an LC-3 machine language program starting at locaiton x3000 that divides the number in memory location x4000 by the number in memory location x4001 and stores the quotient at x5000 and the remainder at x5001
 
 ===================== My approach to the problem ====================
 # Theory and Algorithm #
