@@ -21,10 +21,10 @@ OUTPUT        ST  R7, SAVE
 PRINT         AND R0, R0, #0     ; R0 = 0
               NOT R5, R5
               ADD R5, R5, #1     ; R5 = -R5
-PRINT++       ADD R0, R0, #1     ; Remainder count
+PRINT_LOOP    ADD R0, R0, #1     ; Remainder count
               ST  R6, tmp        ; Save R6 to restore it later
               ADD R6, R6, R5     ; R6 = R6 - R5
-              BRzp PRINT++       ; If R6 >= 0, continue subtracting
+              BRzp PRINT_LOOP    ; If R6 >= 0, continue subtracting
 
               LD  R6, tmp        ; Restore last value of R6 before it results in negative
               ADD R0, R0, #-1    ; Eliminate the last Remainder count that result in negative
