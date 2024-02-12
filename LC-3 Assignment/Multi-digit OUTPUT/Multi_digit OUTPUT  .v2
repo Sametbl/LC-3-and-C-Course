@@ -1,10 +1,14 @@
-; Modification: In version 1, when the outputed number has fewer digits, the ouput will print out non-existing digits as 0's, which is redundant. For example: 345 will be printed out as 00345. This version prevent printing out 0's until the first non-zero digit in print out.
+;====================== Version Modification ======================= 
+; In previous, when the outputed number has fewer digits, the output will extend to 5 digits, which is redundant.
+; For example: 345 will be printed out as 00345. 
+; This version prevent printing out 0's until the first non-zero digit in print out.
 ; Algorithm:
 ; - I create a boolean type flag (initially = 1) that check whether the first digit is 0,
-; - If true, flag == 1 and the system will not print out any 0's. Until a non-zero digit is encountered flag = 0.  
+; - If true, flag == 1 and the system will not print out any 0's. 
+; - Until a non-zero digit is encountered, assign flag = 0, allow printing out 0's (in the number). 
 ; - I used "ST R7, SAVE_2" + "JMP R7" instead of 'RET' because its caused bug for unknown reason.
 
-; Registers used: R0, R5, R6
+; Registers used: R0, R5, R6, R7(RET)
 ; R6 stores the value that needed to print out and R5 stores the divisors
 
 ; ///// R6 = input num
