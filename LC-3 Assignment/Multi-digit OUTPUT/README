@@ -1,0 +1,7 @@
+=================== Version 1 ================
+- Print out unsigned integer ( 0 to 65535 )
+- Always extend to 5 digits.    ( Ex:  34 = 00034) 
+
+=================== Version 2 ================
+- Print out unsigned integer ( 0 to 65535 )
+- Dost not extend to digits
