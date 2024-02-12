@@ -16,7 +16,7 @@ EACH VERSION MODIFICATION
 - Check for non-numberic characters and display error messasge if detected.
 - Cannot input Negative number
 
-=========== Version 3.2 =========
+=========== Version 3.2 =========                                #############     ( unfinished )
 - Multiple digit input ( 0 to 65535 )
 - Used 3 Registers (R0, R6, R7)
 - Check for non-numberic characters and display error message if detected
@@ -30,7 +30,7 @@ EACH VERSION MODIFICATION
 - Check for non-numberic characters and display error message if detected
 (except for '-' character if it is the first inputed character and not inputed more than twice)
 
-=========== Version 5.2 ==========
+=========== Version 5.2 ==========                                #############      ( unfinished )
 - Multiple digit input ( −32768 to 32767 )
 - Used
 - Allowing NEGATIVE input number
