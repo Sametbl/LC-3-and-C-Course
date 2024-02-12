@@ -7,30 +7,27 @@
 ; ///// R6 = input num
 
 OUTPUT        ST  R7, SAVE
+              AND R0, R0, #0     ; R0 = 0
+              ADD R0, R0, #1
+              ST  R0, flag       ; flag = 1, not allow printing 0's until first non-zero digit
               LD  R5, VANJ
-              JSR PRINT
-              OUT                   ; We dont put OUT (trap_vector) in PRINT subroutine because it will cause bug when call RET
+              JSR PRINT 
               LD  R5, THOUSAND
               JSR PRINT
-              OUT
               LD  R5, HUNDRED
               JSR PRINT
-              OUT
               LD  R5, TEN
               JSR PRINT
-              OUT
               ADD R0, R6, R5     ; R6 should < 10 at this point, and R5 still equal to -48
               OUT                ; PRINT OUT the last digit
               LD  R7, SAVE       ; RETURN
               JMP R7                 
               
 
-PRINT         AND R0, R0, #0     ; R0 = 0
-              ADD R0, R0, #1
-              ST  R0, flag       ; flag = 1, not allow printing 0's until first non-zero digit
-              AND R0, R0, #0
+PRINT         ST  R7, SAVE_2
               NOT R5, R5
               ADD R5, R5, #1     ; R5 = -R5
+              AND R0, R0, #0
 PRINT_LOOP    ADD R0, R0, #1     ; Remainder count
               ST  R6, tmp        ; Save R6 to restore it later
               ADD R6, R6, R5     ; R6 = R6 - R5
@@ -39,6 +36,7 @@ PRINT_LOOP    ADD R0, R0, #1     ; Remainder count
               LD  R6, tmp        ; Restore last value of R6 before it results in negative
               ADD R0, R0, #-1    ; Eliminate the last Remainder count that result in negative
               BRnp CONTINUE      ; CONINTUE if R0 is non-zero
+
               LD  R5, flag       
               ADD R5, R5, #0     ; Because Branch condition only apply for ALU operations
               BRz CONTINUE       ; CONTINUE if flag == 0
@@ -49,12 +47,15 @@ CONTINUE      AND R5, R5, #0
               LD  R5, De_ASCII   ; R5 = -48
               NOT R5, R5
               ADD R5, R5, #1     ; R5 = 48
-              ADD R0, R0, R5     
-              RET
+              ADD R0, R0, R5  
+              OUT
+              LD  R7, SAVE_2
+              JMP R7
 
 
 tmp       .BLKW x0001
 SAVE      .BLKW x0001
+SAVE_2    .BLKW x0001
 flag      .BLKW x0001
 De_ASCII  .FILL #-48
 TEN       .FILL #10
