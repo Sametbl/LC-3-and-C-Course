@@ -16,3 +16,7 @@
 - Does not extend to 5 digits
 - Print out number stored in R6
 - Registers used: R0, R6, R5, R7(RET)
+
+___________________________________________________________________________________________
+FUTURE modification:
+- Reduce the number of Register used. Currently used up to 4.
