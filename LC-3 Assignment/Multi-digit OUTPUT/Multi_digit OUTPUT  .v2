@@ -1,5 +1,8 @@
 ; Modification: In version 1, when the outputed number has fewer digits, the ouput will print out non-existing digits as 0's, which is redundant. For example: 345 will be printed out as 00345. This version prevent printing out 0's until the first non-zero digit in print out.
-; Algorithm: We create a boolean type flag (initially = 1) that check whether the first digit is 0, if true, flag == 1 and the system will not print out any 0's. Until a non-zero digit is encountered flag = 0.  
+; Algorithm:
+; - I create a boolean type flag (initially = 1) that check whether the first digit is 0,
+; - If true, flag == 1 and the system will not print out any 0's. Until a non-zero digit is encountered flag = 0.  
+; - I used "ST R7, SAVE_2" + "JMP R7" instead of 'RET' because its caused bug for unknown reason.
 
 ; Registers used: R0, R5, R6
 ; R6 stores the value that needed to print out and R5 stores the divisors
@@ -10,16 +13,17 @@ OUTPUT        ST  R7, SAVE
               AND R0, R0, #0     ; R0 = 0
               ADD R0, R0, #1
               ST  R0, flag       ; flag = 1, not allow printing 0's until first non-zero digit
-              LD  R5, VANJ
+              LD  R5, VANJ       ; R5 = 10000
               JSR PRINT 
-              LD  R5, THOUSAND
+              LD  R5, THOUSAND   ; R5 = 1000
               JSR PRINT
-              LD  R5, HUNDRED
+              LD  R5, HUNDRED    ; R5 = 100
               JSR PRINT
-              LD  R5, TEN
+              LD  R5, TEN        ; R5 = 10
               JSR PRINT
-              ADD R0, R6, R5     ; R6 should < 10 at this point, and R5 still equal to -48
-              OUT                ; PRINT OUT the last digit
+              AND R5, R5, #0
+              ADD R5, R5, #1     ; R5 = 1
+              JSR PRINT
               LD  R7, SAVE       ; RETURN
               JMP R7                 
               
