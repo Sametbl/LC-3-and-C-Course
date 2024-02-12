@@ -1,0 +1,161 @@
+; The subroutine for INPUT and OUTPUT module used: Multi_digit INPUT .v4  +  Multi_digit OUTPUT .v3
+
+.ORIG x3000
+            LEA R0, msg
+            PUTS
+            JSR INPUT
+            ST  R6, num
+
+            LD  R0, TEN
+            OUT
+            LEA R0, msg2
+            PUTS
+            LD  R6, num
+            JSR OUTPUT
+            HALT
+;---------------- The Subroutine -------------
+
+INPUT            ST  R7, SAVE       ; Store return address
+                 AND R6, R6, #0
+INTIAL_LOOP      AND R0, R0, #0    
+                 ST  R0, flag       
+                 GETC
+                 OUT
+                 ST  R0, tmp
+                 ADD R0, R0, #-15
+                 ADD R0, R0, #-15 
+                 ADD R0, R0, #-15   
+                 BRz IS_SIGNED
+                 JSR CHECK
+
+IS_SIGNED        AND R0, R0, #0
+                 ADD R0, R0, #1
+                 ST  R0, flag     
+                 JSR MAIN_LOOP
+
+MAIN_LOOP        GETC      
+                 OUT
+                 ST  R0, tmp        
+                 ADD R0, R0, #-10   
+                 BRz EXIT   
+
+CHECK            LD  R7, tmp        
+                 LD  R0, De_ASCII   
+                 ADD R0, R7, R0   
+                 BRn ERROR        
+                 ADD R0, R0, #-9  
+                 BRp ERROR        
+         
+                 JSR X10_R6         
+
+                 LD  R0, tmp        
+                 ST  R6, tmp     
+                 LD  R6, De_ASCII    
+                 ADD R0, R0, R6    
+                 LD  R6, tmp       
+                 ADD R6, R6, R0     
+                 JSR MAIN_LOOP     
+
+X10_R6           ADD R0, R6, #0     
+                 ST  R0, tmp2
+                 AND R6, R6, #0  
+                 LD  R0, TEN     
+
+X_LOOP           ST  R0, tmp3
+                 LD  R0, tmp2       
+                 ADD R6, R6, R0    
+                 LD  R0, tmp3       
+                 ADD R0, R0, #-1   
+                 BRp X_LOOP         
+                 RET              
+            
+EXIT             LD  R0, flag
+                 ADD R0, R0, #-1    
+                 BRnp EXIT_REAL     
+                 NOT R6, R6
+                 ADD R6, R6, #1    
+EXIT_REAL        LD  R7, SAVE
+                 JMP R7
+              
+ERROR            LD R0, TEN
+                 OUT
+                 LEA R0, error
+                 PUTS
+                 HALT
+              
+error       .STRINGZ "\nInvalid input, program ended.\n"     
+msg         .STRINGZ "Enter number (-32768 to 32767):  "
+msg2        .STRINGZ "Outputing number test: Num = "
+num         .BLKW x0001
+tmp         .BLKW x0001
+tmp2        .BLKW x0001  
+tmp3        .BLKW x0001
+SAVE        .BLKW x0001
+TEN         .FILL x000A
+De_ASCII    .FILL #-48
+
+OUTPUT           ST  R7, SAVE
+                 AND R0, R0, #0    
+                 ADD R0, R0, #1
+                 ST  R0, flag
+
+                 ADD R6, R6, #0       
+                 BRp MAIN_OUTPUT       
+                
+                 NOT R6, R6
+                 ADD R6, R6, #1        
+                 LD  R0, De_ASCII      
+                 ADD R0, R0, #3      
+                 NOT R0, R0
+                 ADD R0, R0, #1        
+                 OUT                  
+
+MAIN_OUTPUT      LD  R5, VANJ       ; R5 = 10000
+                 JSR PRINT 
+                 LD  R5, THOUSAND   ; R5 = 1000
+                 JSR PRINT
+                 LD  R5, HUNDRED    ; R5 = 100
+                 JSR PRINT
+                 LD  R5, TEN        ; R5 = 10
+                 JSR PRINT
+                 AND R5, R5, #0
+                 ADD R5, R5, #1     ; R5 = 1
+                 JSR PRINT
+                 LD  R7, SAVE       ; RETURN
+                 JMP R7                 
+              
+
+PRINT            ST  R7, SAVE_2
+                 NOT R5, R5
+                 ADD R5, R5, #1    
+                 AND R0, R0, #0
+PRINT_LOOP       ADD R0, R0, #1     
+                 ST  R6, tmp       
+                 ADD R6, R6, R5    
+                 BRzp PRINT_LOOP   
+
+                 LD  R6, tmp       
+                 ADD R0, R0, #-1  
+                 BRnp CONTINUE     
+
+                 LD  R5, flag       
+                 ADD R5, R5, #0     
+                 BRz CONTINUE      
+                 RET                
+
+CONTINUE         AND R5, R5, #0
+                 ST  R5, flag       ; flag = 0, allow printing 0's
+                 LD  R5, De_ASCII   ; R5 = -48
+                 NOT R5, R5
+                 ADD R5, R5, #1     ; R5 = 48
+                 ADD R0, R0, R5  
+                 OUT
+                 LD  R7, SAVE_2
+                 JMP R7
+  
+SAVE_2    .BLKW x0001
+flag      .BLKW x0001
+HUNDRED   .FILL #100
+THOUSAND  .FILL #1000
+VANJ      .FILL #10000
+.END
