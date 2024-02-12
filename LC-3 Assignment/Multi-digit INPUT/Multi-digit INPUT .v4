@@ -26,7 +26,6 @@ INTIAL_LOOP      AND R0, R0, #0
                  ADD R0, R0, #-15
                  ADD R0, R0, #-15   ; Overall : R0 = R0 - 45  (check for '-' character)
                  BRz IS_SIGNED
-                 LD  R0, tmp        ; Check R0
                  JSR CHECK          ; if not '-' character, continue inputing, but firstly, check whether the current character a number or non-number.
 
                  JSR MAIN_LOOP
