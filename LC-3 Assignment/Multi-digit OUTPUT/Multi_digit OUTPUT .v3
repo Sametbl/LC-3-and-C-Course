@@ -1,8 +1,11 @@
-; Modification: In version 1, when the outputed number has fewer digits, the ouput will print out non-existing digits as 0's, which is redundant. For example: 345 will be printed out as 00345. This version prevent printing out 0's until the first non-zero digit in print out.
+;================= Version Modification ===================================
+; This version allow printing signed integer 
+; The range of valid integer is -32768 to 32676. Printing out number outside this scope may not cause error but unexpected behavior.
 ; Algorithm:
-; - I create a boolean type flag (initially = 1) that check whether the first digit is 0,
-; - If true, flag == 1 and the system will not print out any 0's. Until a non-zero digit is encountered flag = 0.  
-; - I used "ST R7, SAVE_2" + "JMP R7" instead of 'RET' because its caused bug for unknown reason.
+; The Branch condition of LC-3 do the job, just apply it to R6 check if it negative or not
+; If positive, print the number as usual
+; If negative, Add '-' symbol infront and then print out absolute value of R6   ( |R6| = -R6, when R6 <0 )
+
 
 ; Registers used: R0, R5, R6
 ; R6 stores the value that needed to print out and R5 stores the divisors
