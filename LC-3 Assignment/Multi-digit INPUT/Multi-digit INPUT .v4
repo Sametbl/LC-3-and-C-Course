@@ -1,9 +1,11 @@
 ; ================= Version-4 modification ===================
 ; This version allows Negative input numbers, which is done by entering '-' character once as first character (the only allowed non-numberic number)  
 ; Algorithm: 
-;   We create a boolean flag that check the first inputed character is hyphen or not. 
-;   This process required a intial input check subroutine "INTIAL_LOOP", the value of the flag only determine once in this loop, if hyphen character is entered again, an error message will appear due to inputed non-numberic character
-;   Before exiting after newline character encountered, invert the value of R6 if flag == 1 ( EXIT subroutine )
+; -  We create a boolean flag that check the first inputed character is hyphen or not. 
+; -  This process required a intial input check subroutine "INTIAL_LOOP", the value of the flag only determine once in this loop
+; -  If the character input "INTIAL_LOOP" is not '-' then jump the subroutine "CHECK" to determine whether its a valid digit or not.
+; -  If hyphen character is entered again, an error message will appear due to inputed non-numberic character
+; -  Before exiting after newline character encountered, invert the value of R6 if flag == 1 ( EXIT subroutine )
 
 ;   ISSUE: This may cause unexpected behavior if user enters number lower than -35536 ( Ex: -53646). Version 4.2 should try to fix this.
 
@@ -14,14 +16,19 @@
 ; R6 is the Output integer
 
 INPUT            ST  R7, SAVE       ; Store return address
+                 AND R6, R6, #0     ; make sure R6 = 0
 INTIAL_LOOP      AND R0, R0, #0    
                  ST  R0, flag       ; flag = 0: the input expected to be unsigned
                  GETC
                  OUT
-                 LD  
-                 ADD R0, R0, #-30 
+                 ST  R0, tmp        ; If R0 is a digit, save it and check it later
+                 ADD R0, R0, #-15   ; Because ADD instruction immediate field is between -16 and 15
+                 ADD R0, R0, #-15
                  ADD R0, R0, #-15   ; Overall : R0 = R0 - 45  (check for '-' character)
                  BRz IS_SIGNED
+                 LD  R0, tmp        ; Check R0
+                 JSR CHECK          ; if not '-' character, continue inputing, but firstly, check whether the current character a number or non-number.
+
                  JSR MAIN_LOOP
 
 IS_SIGNED        AND R0, R0, #0
@@ -35,7 +42,7 @@ MAIN_LOOP        GETC
                  ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
                  BRz EXIT           ; If true, stop inputing and exit
 
-                 LD  R7, tmp        ; R7 = inputed character
+CHECK            LD  R7, tmp        ; R7 = inputed character
                  LD  R0, De_ASCII   ; chech if 47 < R0 < 58
                  ADD R0, R7, R0     ; R0 = R7 - 48
                  BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
