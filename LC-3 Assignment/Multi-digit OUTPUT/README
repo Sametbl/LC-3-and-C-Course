@@ -1,7 +1,18 @@
 =================== Version 1 ================
 - Print out unsigned integer ( 0 to 65535 )
+- Print out number stored in R6
+- Registers used: R0, R6, R5, R7(RET)
 - Always extend to 5 digits.    ( Ex:  34 = 00034) 
 
 =================== Version 2 ================
 - Print out unsigned integer ( 0 to 65535 )
-- Dost not extend to digits
+- Print out number stored in R6
+- Registers used: R0, R6, R5, R7(RET)
+- Dost not extend to 5 digits
+
+=================== Version 3 ================
+- Allow printing out Negative Number
+- Print out unsigned integer ( -32768 to 32767 )  => Go outside this range will print out undesired number
+- Does not extend to 5 digits
+- Print out number stored in R6
+- Registers used: R0, R6, R5, R7(RET)
