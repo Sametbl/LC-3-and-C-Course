@@ -1,0 +1,80 @@
+; Modification: In version 1, when the outputed number has fewer digits, the ouput will print out non-existing digits as 0's, which is redundant. For example: 345 will be printed out as 00345. This version prevent printing out 0's until the first non-zero digit in print out.
+; Algorithm:
+; - I create a boolean type flag (initially = 1) that check whether the first digit is 0,
+; - If true, flag == 1 and the system will not print out any 0's. Until a non-zero digit is encountered flag = 0.  
+; - I used "ST R7, SAVE_2" + "JMP R7" instead of 'RET' because its caused bug for unknown reason.
+
+; Registers used: R0, R5, R6
+; R6 stores the value that needed to print out and R5 stores the divisors
+
+; ///// R6 = input num
+
+OUTPUT        ST  R7, SAVE
+              AND R0, R0, #0     ; R0 = 0
+              ADD R0, R0, #1
+              ST  R0, flag       ; flag = 1, not allow printing 0's until first non-zero digit
+
+              ADD R6, R6, #0        ; R6 unchanged, this line is to apply the brnach condition
+              BRp MAIN_OUTPUT       ; if R6 > 0, just continue printing the damn number
+                
+              NOT R6, R6
+              ADD R6, R6, #1        ; When R6 < 0,  |R6| = -R6
+              LD  R0, De_ASCII      ; R0 = -48
+              ADD R0, R0, #3        ; R0 = -45
+              NOT R0, R0
+              ADD R0, R0, #1        ; R0 = 45 ('-' character)
+              OUT                   ; print out hyphen to indicate negative number and then |R6|
+
+MAIN_OUTPUT   LD  R5, VANJ       ; R5 = 10000
+              JSR PRINT 
+              LD  R5, THOUSAND   ; R5 = 1000
+              JSR PRINT
+              LD  R5, HUNDRED    ; R5 = 100
+              JSR PRINT
+              LD  R5, TEN        ; R5 = 10
+              JSR PRINT
+              AND R5, R5, #0
+              ADD R5, R5, #1     ; R5 = 1
+              JSR PRINT
+              LD  R7, SAVE       ; RETURN
+              JMP R7                 
+              
+
+PRINT         ST  R7, SAVE_2
+              NOT R5, R5
+              ADD R5, R5, #1     ; R5 = -R5
+              AND R0, R0, #0
+PRINT_LOOP    ADD R0, R0, #1     ; Remainder count
+              ST  R6, tmp        ; Save R6 to restore it later
+              ADD R6, R6, R5     ; R6 = R6 - R5
+              BRzp PRINT_LOOP    ; If R6 >= 0, continue subtracting
+
+              LD  R6, tmp        ; Restore last value of R6 before it results in negative
+              ADD R0, R0, #-1    ; Eliminate the last Remainder count that result in negative
+              BRnp CONTINUE      ; CONINTUE if R0 is non-zero
+
+              LD  R5, flag       
+              ADD R5, R5, #0     ; Because Branch condition only apply for ALU operations
+              BRz CONTINUE       ; CONTINUE if flag == 0
+              RET                ; Not print out anything, continue the next digit
+
+CONTINUE      AND R5, R5, #0
+              ST  R5, flag       ; flag = 0, allow printing 0's
+              LD  R5, De_ASCII   ; R5 = -48
+              NOT R5, R5
+              ADD R5, R5, #1     ; R5 = 48
+              ADD R0, R0, R5  
+              OUT
+              LD  R7, SAVE_2
+              JMP R7
+
+
+tmp       .BLKW x0001
+SAVE      .BLKW x0001
+SAVE_2    .BLKW x0001
+flag      .BLKW x0001
+De_ASCII  .FILL #-48
+TEN       .FILL #10
+HUNDRED   .FILL #100
+THOUSAND  .FILL #1000
+VANJ      .FILL #10000
