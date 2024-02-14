@@ -17,7 +17,7 @@
                     STI R6, num2
 
                     LEA R0, space
-                    PUTS                  ; newline 3 times
+                    PUTS                  ; newline 2 times
 
                     LEA R0, msg1          ; Output x4000 (for testing)
                     PUTS
@@ -47,7 +47,8 @@
                     PUTS
                     LDI R6, REMAIN
                     JSR OUTPUT
-                    LEA R0, space      ; space 3 times
+                    LEA R0, space      ; space 2 times
+                    PUTS
                     HALT
    
                      
@@ -72,7 +73,7 @@ DIVISION    LDI  R1, num1       ; LOAD numbers from x4001 (pointed by num1)
 
 plz1     .STRINGZ "Plz input an integer to x4000: a = "
 plz2     .STRINGZ "Plz input an integer to x4001: b = "
-space    .STRINGZ "\n\n\n" 
+space    .STRINGZ "\n\n" 
 msg1     .STRINGZ "Number stored in x4000: a = "
 msg2     .STRINGZ "Number stored in x4001: b = "
 msg3     .STRINGZ "Calculating a/b...\n"
