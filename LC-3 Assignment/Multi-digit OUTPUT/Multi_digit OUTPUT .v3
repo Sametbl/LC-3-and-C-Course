@@ -18,7 +18,7 @@ OUTPUT        ST  R7, SAVE
               ST  R0, flag       ; flag = 1, not allow printing 0's until first non-zero digit
 
               ADD R6, R6, #0        ; R6 unchanged, this line is to apply the brnach condition
-              BRp MAIN_OUTPUT       ; if R6 > 0, just continue printing the damn number
+              BRzp MAIN_OUTPUT       ; if R6 >= 0, just continue printing the damn number
                 
               NOT R6, R6
               ADD R6, R6, #1        ; When R6 < 0,  |R6| = -R6
@@ -35,12 +35,22 @@ MAIN_OUTPUT   LD  R5, VANJ       ; R5 = 10000
               LD  R5, HUNDRED    ; R5 = 100
               JSR PRINT
               LD  R5, TEN        ; R5 = 10
-              JSR PRINT
-              AND R5, R5, #0
+              JSR PRINT          ; now, R6 should less than 10
+
+              ADD R5, R6, #0     ; set R5 = R6, check if R6 == 0
+              BRz LAST_ZERO
+              AND R5, R5, #0     ; else print the last non-zero digit
               ADD R5, R5, #1     ; R5 = 1
               JSR PRINT
               LD  R7, SAVE       ; RETURN
               JMP R7                 
+              
+LAST_ZERO     LD  R0, De_ASCII   ; R0 = -48
+              NOT R0, R0 
+              ADD R0, R0, #1     ; R0 = 48 (zero)
+              OUT
+              LD R7, SAVE
+              JMP R7        
               
 
 PRINT         ST  R7, SAVE_2
