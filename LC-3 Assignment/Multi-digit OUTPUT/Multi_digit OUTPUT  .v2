@@ -8,6 +8,10 @@
 ; - Until a non-zero digit is encountered, assign flag = 0, allow printing out 0's (in the number). 
 ; - I used "ST R7, SAVE_2" + "JMP R7" instead of 'RET' because its caused bug for unknown reason.
 
+; Special case: if input is literal 0, is this cause bug.
+; To fix it, when printing the last digit, always check the remainder after x10 divsion whether it is 0 or not. Then print out 0's if true
+;       ( this true for both literal 0 and some number ended with a zero )
+
 ; Registers used: R0, R5, R6, R7(RET)
 ; R6 stores the value that needed to print out and R5 stores the divisors
 
@@ -24,13 +28,22 @@ OUTPUT        ST  R7, SAVE
               LD  R5, HUNDRED    ; R5 = 100
               JSR PRINT
               LD  R5, TEN        ; R5 = 10
-              JSR PRINT
-              AND R5, R5, #0
+              JSR PRINT          ; now, R6 should less than 10
+
+              ADD R5, R6, #0     ; set R5 = R6, check if R6 == 0
+              BRz LAST_ZERO
+              AND R5, R5, #0     ; else print the last non-zero digit
               ADD R5, R5, #1     ; R5 = 1
               JSR PRINT
               LD  R7, SAVE       ; RETURN
               JMP R7                 
               
+LAST_ZERO     LD  R0, De_ASCII   ; R0 = -48
+              NOT R0, R0 
+              ADD R0, R0, #1     ; R0 = 48 (zero)
+              OUT
+              LD R7, SAVE
+              JMP R7
 
 PRINT         ST  R7, SAVE_2
               NOT R5, R5
