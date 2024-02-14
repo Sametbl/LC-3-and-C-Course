@@ -6,7 +6,7 @@
 
 ---------------------- Le Program -----------------
 .ORIG x3000
-                    LEA R0. msg1
+                    LEA R0, msg1
                     PUTS
                     LDI R6, num1
                     JSR OUTPUT
