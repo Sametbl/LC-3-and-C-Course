@@ -2,6 +2,7 @@
 ; The Subroutine performs numbers stored in x4000 divide by x4001. 
 ; Quotient is stored in x5000  (Register: R3,    Label: QUOTI)
 ; Remainder is stored in x5001 (Register: None,  Label: REMAIN)
+; Only work for unsigned integer ( 0 -> 65535)
 
 DIVISION    LDI  R1, num1       ; LOAD numbers from x4001 (pointed by num1) 
             LDI  R2, num2       ; LOAD x4001 (pointed by num2)
