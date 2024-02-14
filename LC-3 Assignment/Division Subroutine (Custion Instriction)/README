@@ -1,0 +1,9 @@
+MODIFICATION NOTE
+
+=========== VERSION 1 =============
+- Divide R1 by R2 (not necessary x4000 / x4001), and does not change values of R1, R2
+- Store Quotient and Remainder in x5000 (or R3) and x5001
+
+=========== VERSION 2 =============
+- Divide x4000 by x40001 ( LABEL: num1 and num2)
+- Store in Quotient and Remainder in x5000 and x5001
