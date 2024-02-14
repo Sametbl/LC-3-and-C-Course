@@ -19,6 +19,8 @@
                     LDI R6, num2
                     JSR OUTPUT
 
+                    LD  R0, TEN
+                    OUT                ; newline
                     LEA R0, msg3       ; Informing the operation 
                     PUTS
                     JSR DIVISION       ; Execute operation
