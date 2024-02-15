@@ -1,0 +1,99 @@
+; Registers involved: R1, R2, R3
+; The Subroutine performs numbers stored in x4000 divide by x4001. 
+; Quotient is stored in x5000  (Register: R3,    Label: QUOTI)
+; Remainder is stored in x5001 (Register: None,  Label: REMAIN)
+; Allow signed integer ( -32768 -> 32767 )
+; Algorithm: 
+ - Create a sign indicating variable (flag), idealy 2-bit. 
+ - flag == 0, both numerator & denominator > 0       => result = |num1| / |num2|      ; Quotient & Remainder > 0 
+ - flag == 1, either numerator OR denominator < 0    => result = - |num1| / |num2|    ; Quotient & Remainder < 0
+ - flag == 2, both numerator & denominator < 0       =? result = |num1| / |num2|      ; Quotient > 0, Remainder < 0
+===> Remainder < 0 when flag != 0
+===> This idea is deduced from the fact:    Numerator = (Demoniator * Quotient)  + Remainder
+              Ex : -27 divide by 6   , Quo = -4 & Rei = -3       ; Because  -27 =  6 * (-4) + -3
+              Ex : -27 divide by -6  , Quo =  4 & Rei = -3       ; Because  -27 = -6 * 4  + -3
+ - It is convenient to have a Subroutine that calulate Abs()
+
+DIVISION    ST  R7, SAVE       ; SAVE return address
+            AND R1, R1, #0
+            ST  R1, flag       ; init flag = 0
+
+            LDI R1, num1       ; LOAD numbers from x4001 (pointed by num1) 
+            ADD R3, R1, #0     ; set R3 = R1
+            JSR SIGN_CHECK     ; check sign
+            ADD R3, R1, #0     ;
+            JSR ABS_R3
+            ADD R1, R3, #0     ; R1 = abs(R1)
+
+            LDI R2, num2       ; LOAD x4001 (pointed by num2)
+            ADD R3, R2, #0
+            JSR SIGN_CHECK     ; vibe check
+            ADD R2, R2, #0     ; Check if R2 == 0 ? Math error
+            BRz MATH_ERROR
+            ADD R3, R2, #0
+            JSR ABS_R3
+            ADD R2, R3, #0     ; R2 = abs(R2)
+            NOT R2, R2
+            ADD R2, R2, #1     ; 2's complement R2 = - abs(R2)
+
+LOOP        ST  R1, tmp        ; Temporary save the previous value of R1 before it becomes Negative
+            ADD R3, R3, #1     ; R3 = number of substraction
+            ADD R1, R1, R2     ; R1 = R1 - R2  
+            BRzp LOOP          ; if R1 >= 0, continue substracting
+
+            ADD R3, R3, #-1    ; Eliminate the quotient count of substraction that results in Negative
+            STI R3, QUOTI      ; Store in x5000
+            LD  R1, tmp        ; Load value of R1 before it results in Negative. This is the REMAINDER
+            STI R1, REMAIN     ; Store in x5001    
+;------------- Last step: vibe check ---------------------
+            LD  R1, flag    
+            ADD R1, R1, #-1    ; check if flag == 1
+            BRnp NEXT_CHECK    ; if (R1 - 1) != 0, skip inverting
+            LD  R3, REMAIN     ; Invert Remainder
+            NOT R3, R3
+            ADD R3, R3, #1    
+            ST  R3, REMAIN     ; Store the inverted Remainder
+            LD  R3, QUOTI      ; Invert Quotient
+            NOT R3, R3
+            ADD R3, R3, #1
+            ST  R3, QUOTI      ; Store the inverted Quotient
+            JSR EXIT
+
+NEXT_CHECK  ADD R1, R1, #-1    ; check if (flag -1) == 1   or flag == 2 
+            BRnp EXIT          ; if (flag -1) != 0,  EXIT 
+            LD R3, REMAIN      ; Only need to invert Remainder
+            NOT R3, R3 
+            ADD R3, R3, #1     
+            ST  R3, REMAIN
+            JSR EXIT
+;-------------- Sub ! --------------
+EXIT        LD  R7, SAVE
+            JMP R7
+
+SIGN_CHECK  ADD R3, R3, #0     ; check if R3 < 0
+            BRn TRUE
+            RET                ; else skip
+TRUE        LD  R3, flag
+            ADD R3, R3, #1
+            ST  R3, flag       ; flag += 1
+            RET
+
+ABS_R3      ADD R3, R3, #0
+            BRn INVERT_R3
+            RET
+INVERT_R3   NOT R3, R3          ; |R3| = -R3 , for R3 < 0
+            ADD R3, R3, #1 
+            RET
+            
+MATH_ERROR  LEA R0, math_error
+            PUTS
+            JSR EXIT
+
+math_error .STRINGZ "MATH ERROR"
+tmp      .BLKW x0001
+flag     .BLKW x0001
+SAVE     .BLKW x0001
+num1     .FILL x4000
+num2     .FILL x4001 
+QUOTI    .FILL x5000
+REMAIN   .FILL x5001
