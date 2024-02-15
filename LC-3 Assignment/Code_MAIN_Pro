@@ -38,7 +38,7 @@ msg2     .STRINGZ "Number stored in x4001: b = "
                     LDI R6, num2
                     JSR OUTPUT
 
-msg3     .STRINGZ "\nCalculating a/b...\n"
+msg3     .STRINGZ "\nCalculating a/b ...\n"
                     LD  R0, TEN           ; newline character
                     OUT  
                     LEA R0, msg3       ; Informing the operation 
@@ -328,6 +328,6 @@ SENT1   .STRINGZ "\n\nBecause "
 SENT2   .STRINGZ " = "
 SENT3   .STRINGZ " * "
 SENT4   .STRINGZ "  + "
-SENT5   .STRINGZ "\n(Numerator) = (Denominator) * (Quotient)  + (Remainder)\n\n"
+SENT5   .STRINGZ "\n(Numerator) = (Denominator) * (Quotient)  + (Remainder)\n"
 
 .END
