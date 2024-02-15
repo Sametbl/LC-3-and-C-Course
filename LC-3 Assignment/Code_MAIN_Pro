@@ -7,15 +7,15 @@
 
 ; ---------------------- Le Program -----------------
 .ORIG x3000
-instruction .STRINGZ "Note1: The acceptable integer range: -32768 to 32767\nNote2: Non-numberic character entered will Halt the program\n\n"
+instruction .STRINGZ "Note 1: The acceptable integer range: -32768 to 32767\nNote 2: Non-numberic character entered will Halt the program\nNote 3: '-' only enter once to indicate negative number\n"
                     LEA R0, instruction
                     PUTS
-plz1     .STRINGZ "Plz input an integer to x4000: a = "           
+plz1     .STRINGZ ">> Plz input an integer to x4000: a = "           
                     LEA R0, plz1          ; input x4000
                     PUTS
                     JSR INPUT
                     STI R6, num1
-plz2     .STRINGZ "Plz input an integer to x4001: b = "       
+plz2     .STRINGZ ">> Plz input an integer to x4001: b = "       
                     LEA R0, plz2          ; input x4001
                     PUTS
                     JSR INPUT
@@ -24,7 +24,7 @@ plz2     .STRINGZ "Plz input an integer to x4001: b = "
                     LD R0, TEN
                     OUT                   ; newline 
 
-msg1     .STRINGZ "Number stored in x4000: a = "
+msg1     .STRINGZ "- Number stored in x4000: a = "
                     LEA R0, msg1          ; Output x4000 (for testing)
                     PUTS
                     LDI R6, num1
@@ -32,7 +32,7 @@ msg1     .STRINGZ "Number stored in x4000: a = "
                     LD  R0, TEN           ; newline character
                     OUT               
 
-msg2     .STRINGZ "Number stored in x4001: b = "
+msg2     .STRINGZ "- Number stored in x4001: b = "
                     LEA R0, msg2          ; Output x4001
                     PUTS
                     LDI R6, num2
@@ -45,7 +45,7 @@ msg3     .STRINGZ "\nCalculating a/b ...\n"
                     PUTS
                     JSR DIVISION       ; Execute operation
 
-msgQuo   .STRINGZ "The result Quotient: "
+msgQuo   .STRINGZ "=> The result Quotient: "
                     LEA R0, msgQuo
                     PUTS
                     LDI R6, QUOTI      ; Print out Quotient
@@ -53,7 +53,7 @@ msgQuo   .STRINGZ "The result Quotient: "
                     LD  R0, TEN
                     OUT                ; newline
 
-msgRei   .STRINGZ "The result Remainda: "
+msgRei   .STRINGZ "=> The result Remainda: "
                     LEA R0, msgRei
                     PUTS
                     LDI R6, REMAIN
@@ -138,12 +138,12 @@ INVERT_R3   NOT R3, R3          ; |R3| = -R3 , for R3 < 0
             
 MATH_ERROR  LEA R0, math_error
             PUTS
-            JSR EXIT
+            HALT
 
-math_error .STRINGZ "MATH ERROR"
 TEN      .FILL x000A        
 De_ASCII .FILL #-48          
 tmp      .BLKW x0001
+math_error .STRINGZ "----- MATH ERROR -----\nCannot divide by 0.\n"
 
 ; -------------- INPUT SUBROUTINE ----------------------
 INPUT            ST  R7, SAVE       ; Store return address
@@ -300,29 +300,34 @@ VANJ      .FILL #10000
 ENDING       ST  R7, tmp       ; Not SAVE or SAVE_2, becaue OUTPUT subroutine uses them
              LEA R0, SENT1
              PUTS
-             LDI R6, num1
+             LDI R6, a
              JSR OUTPUT
 
              LEA R0, SENT2
              PUTS
-             LDI R6, num2
+             LDI R6, b
              JSR OUTPUT
 
              LEA R0, SENT3
              PUTS
-             LDI R6, QUOTI
+             LDI R6, quotient
              JSR OUTPUT
 
              LEA R0, SENT4
              PUTS
-             LDI R6, REMAIN
+             LDI R6, remainder
              JSR OUTPUT
 
              LEA R0, SENT5
              PUTS
              LD  R7, tmp
              JMP R7
-             
+
+; At this point, cannot LOAD or STORE labels num1, num2, QUOTI, REAMIN because too far away (offset exceed -256)
+a           .FILL x4000
+b           .FILL x4001
+quotient    .FILL x5000
+remainder   .FILL x5001
 SENT1   .STRINGZ "\n\nBecause "
 SENT2   .STRINGZ " = "
 SENT3   .STRINGZ " * "
