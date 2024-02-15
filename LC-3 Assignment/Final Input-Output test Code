@@ -71,10 +71,10 @@ X_LOOP           ST  R0, tmp3
             
 PRE_EXIT         LD  R0, flag
                  ADD R0, R0, #-1    
-                 BRnp EXIT_REAL     
+                 BRnp EXIT     
                  NOT R6, R6
                  ADD R6, R6, #1    
-EXIT        LD  R7, SAVE
+EXIT             LD  R7, SAVE
                  JMP R7
               
 ERROR            LD R0, TEN
