@@ -39,7 +39,7 @@ MAIN_LOOP        GETC
                  OUT
                  ST  R0, tmp        ; Temporary save R0, to check for Newline character
                  ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
-                 BRz EXIT           ; If true, stop inputing and exit
+                 BRz PRE_EXIT       ; If true, stop inputing and exit
 
 CHECK            LD  R7, tmp        ; R7 = inputed character
                  LD  R0, De_ASCII   ; chech if 47 < R0 < 58
@@ -71,12 +71,12 @@ X_LOOP           ST  R0, tmp3
                  BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
                  RET                ; else Return
             
-EXIT             LD  R0, flag
+PRE_EXIT         LD  R0, flag
                  ADD R0, R0, #-1    ;
                  BRnp EXIT_REAL     ; if (flag -1) != 0, actually exiting
                  NOT R6, R6
                  ADD R6, R6, #1     ; if (flag -1) == 0, invert R6 before exit
-EXIT_REAL        LD  R7, SAVE
+EXIT             LD  R7, SAVE
                  JMP R7
               
 ERROR            LD R0, TEN
