@@ -13,12 +13,12 @@ Write an LC-3 machine language program starting at locaiton x3000 that divides t
 - If division involves negative numbers, this approach is still valid if we take absolute value of these numbers and apply the "sign rule" at the end.
 - The "sign rule" : Same signs - the answer is Positive   ;    Different signs - the answer is Negative
 
-- ISSUE with this solution: when perfoms 0/0, the output is 0, which is FUCKED. 
-=> This can easily fixed by additional code. But this prove that this decomposition of division is FLAWED and somewhat WRONG.
+- ISSUE with this solution: when perfoms 0/0, the output is 0, and non-zero number /0 will stucked in infinite loop. This is FUCKED. 
+=> This can easily fixed by additional code. But this proved that this decomposition of division is NOT entirely CORRECT.
 
-=> Expecting a solution B (Too lazy for further research)
+=> Expecting a solution B 
 //// SOLUTION B
-...
+... No idea, my brain is fried
 
 
 2. Size of integers
