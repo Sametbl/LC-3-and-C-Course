@@ -7,6 +7,9 @@
 ; Version update: for testing purpose, this version ask user to input numbers to x4000 and 4001. 
 ; ---------------------- Le Program -----------------
 .ORIG x3000
+instruction .STRINGZ "Note1: The acceptable integer range: -32768 to 32767\nNote2: Non-numberic character entered will Halt the program\n\n"
+                    LEA R0, instruction
+                    PUTS
 plz1     .STRINGZ "Plz input an integer to x4000: a = "           
                     LEA R0, plz1          ; input x4000
                     PUTS
@@ -18,8 +21,8 @@ plz2     .STRINGZ "Plz input an integer to x4001: b = "
                     JSR INPUT
                     STI R6, num2
 
-                    LEA R0, space
-                    PUTS                  ; newline 2 times
+                    LD R0, TEN
+                    OUT                   ; newline 
 
 msg1     .STRINGZ "Number stored in x4000: a = "
                     LEA R0, msg1          ; Output x4000 (for testing)
@@ -35,7 +38,7 @@ msg2     .STRINGZ "Number stored in x4001: b = "
                     LDI R6, num2
                     JSR OUTPUT
 
-msg3     .STRINGZ "Calculating a/b...\n"
+msg3     .STRINGZ "\nCalculating a/b...\n"
                     LD  R0, TEN           ; newline character
                     OUT  
                     LEA R0, msg3       ; Informing the operation 
@@ -55,10 +58,10 @@ msgRei   .STRINGZ "The result Remainda: "
                     PUTS
                     LDI R6, REMAIN
                     JSR OUTPUT
-                    LEA R0, space      ; space 2 times
-                    PUTS
+                    JSR ENDING                    
                     HALT
               
+;======================== Subroutines =================================
 
 DIVISION    ST  R7, SAVE       ; SAVE return address
             AND R1, R1, #0
@@ -106,8 +109,8 @@ LOOP        ST  R1, tmp        ; Temporary save the previous value of R1 before 
             STI R3, QUOTI      ; Store the inverted Quotient
             JSR EXIT
 
-NEXT_CHECK  ADD R1, R1, #-1    ; check if (flag -1) == 1   or flag == 2 
-            BRnp EXIT          ; if (flag -1) != 0,  EXIT 
+NEXT_CHECK  ADD R1, R1, #-1     ; check if (flag -1) == 1   or flag == 2 
+            BRnp EXIT           ; if (flag -1) != 0,  EXIT 
             LDI R3, REMAIN      ; Only need to invert Remainder
             NOT R3, R3 
             ADD R3, R3, #1     
@@ -168,7 +171,7 @@ MAIN_LOOP        GETC
                  OUT
                  ST  R0, tmp        ; Temporary save R0, to check for Newline character
                  ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
-                 BRz EXIT           ; If true, stop inputing and exit
+                 BRz PRE_EXIT       ; If true, stop inputing and exit
 
 CHECK            LD  R7, tmp        ; R7 = inputed character
                  LD  R0, De_ASCII   ; chech if 47 < R0 < 58
@@ -199,13 +202,13 @@ X_LOOP           ST  R0, tmp3
                  ADD R0, R0, #-1    ; tmp3--    
                  BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
                  RET                ; else Return
-            
-EXIT             LD  R0, flag
+;-------------------------------            
+PRE_EXIT         LD  R0, flag
                  ADD R0, R0, #-1    ;
-                 BRnp EXIT_REAL     ; if (flag -1) != 0, actually exiting
+                 BRnp EXIT          ; if (flag -1) != 0, actually exiting
                  NOT R6, R6
                  ADD R6, R6, #1     ; if (flag -1) == 0, invert R6 before exit
-EXIT_REAL        LD  R7, SAVE
+EXIT             LD  R7, SAVE
                  JMP R7
               
 ERROR            LD R0, TEN
@@ -251,15 +254,13 @@ MAIN_OUTPUT   LD  R5, VANJ       ; R5 = 10000
               AND R5, R5, #0     ; else print the last non-zero digit
               ADD R5, R5, #1     ; R5 = 1
               JSR PRINT
-              LD  R7, SAVE       ; RETURN
-              JMP R7                 
+              JSR EXIT          
               
 LAST_ZERO     LD  R0, De_ASCII   ; R0 = -48
               NOT R0, R0 
               ADD R0, R0, #1     ; R0 = 48 (zero)
               OUT
-              LD R7, SAVE
-              JMP R7        
+              JSR EXIT      
               
 
 PRINT         ST  R7, SAVE_2
@@ -295,5 +296,38 @@ SAVE_2    .BLKW x0001
 HUNDRED   .FILL #100
 THOUSAND  .FILL #1000
 VANJ      .FILL #10000
+
+;-------------- ENDING CHECK (cuz I laik) ------------------
+ENDING       ST  R7, tmp       ; Not SAVE or SAVE_2, becaue OUTPUT subroutine uses them
+             LEA R0, SENT1
+             PUTS
+             LDI R6, num1
+             JSR OUTPUT
+
+             LEA R0, SENT2
+             PUTS
+             LDI R6, num2
+             JSR OUTPUT
+
+             LEA R0, SENT3
+             PUTS
+             LDI R6, QUOTI
+             JSR OUTPUT
+
+             LEA R0, SENT4
+             PUTS
+             LDI R6, REMAIN
+             JSR OUTPUT
+
+             LEA R0, SENT5
+             PUTS
+             LD  R7, tmp
+             JMP R7
+             
+SENT1   .STRINGZ "\n\nBecause "
+SENT2   .STRINGZ " = "
+SENT3   .STRINGZ " * "
+SENT4   .STRINGZ "  + "
+SENT5   .STRINGZ "\n(Numerator) = (Denominator) * (Quotient)  + (Remainder)\n\n"
 
 .END
