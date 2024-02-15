@@ -8,7 +8,7 @@ Write an LC-3 machine language program starting at locaiton x3000 that divides t
 ===================== My approach to the problem ====================
 # Theory and Algorithm #
 1. Algorithm for Division in LC-3
-//// SOLUTION A
+-------------------------------- SOLUTION A ------------------------
 - Division is a loop of substraction, the number of times loop repeated before the subtration result in negative numbers is the Quotient and the remaining number (smaller than divisor) is the Remainder.
 - If division involves negative numbers, this approach is still valid if we take absolute value of these numbers and apply the "sign rule" at the end.
 - The "sign rule" : Same signs - the answer is Positive   ;    Different signs - the answer is Negative
@@ -16,17 +16,44 @@ Write an LC-3 machine language program starting at locaiton x3000 that divides t
 - ISSUE with this solution: when perfoms 0/0, the output is 0, and non-zero number /0 will stucked in infinite loop. This is FUCKED. 
 => This can easily fixed by additional code. But this proved that this decomposition of division is NOT entirely CORRECT.
 
+
 => Expecting a solution B 
-//// SOLUTION B
+-------------------------------- SOLUTION B ---------------------------
 ... No idea, my brain is fried
 
+2. For division that involve Negative numbers, there are 2 Convention:
+a) Convention 1: Remainder is Positive
+          
+ Remainder = Remainder of (|Numerator| / |Denominator|)
+                  Ex:  27 divide by -6   =>     27 = -6 * -4  +3
+                  Ex: -27 divide by  6   =>    -27 =  6 * -5  +3
+                  Ex: -27 divide by -6   =>    -27 = -6 *  5  +3
+ => Numerator &  Denominator > 0        => Quotient & Remainder > 0     ,  Quotient  =   Quotient
+ => Numerator OR Denominator < 0        => Quotient < 0,   Remainder > 0,  Quotient  = -[Quotient +1]
+ => Numerator &  Denominator < 0        => Quotient > 0,   Remainder < 0,  Quotient  =   Quotient
+=====> Calculating Quotient will complicated as FUCK
 
-2. Size of integers
+b) Convention 2: Remainder is Negative
+                  Ex:  27 divide by -6   =>     27 = -6 * -4  -3
+                  Ex: -27 divide by  6   =>    -27 =  6 * -4  -3
+                  Ex: -27 divide by -6   =>    -24 = -6 *  4  -3
+ => Numerator &  Denominator > 0        => Quotient & Remainder > 0 
+ => Numerator OR Denominator < 0        => Quotient & Remainder < 0
+ => Numerator &  Denominator < 0        => Quotient > 0,   Remainder < 0
+=====> The Quotient in this method only 1 simple number in any cases, only the signed is afternated.
+=====>         Quotient  = -Quotient           if one of the Numerator OR Denominator < 0 
+               Remainder = -Remainder          if either Numerator OR Denominator < 0
+=====>  NOICE
+
+3. Size of integers
 - Registers in LC-3 have size of 16-bit, the maxinum signed number LC-3 can represents is -(2^15 - 1) to 2^15 || −32,768 to 32,767, so registers in LC-3 only capable of performing arithmetic operations in this range.
 
 
----------------------------- OPTIONAL, NOT REQUIRED IN THE PROBLEM ------------------------ 
-3. Inputing multiple-digit number
+======================== OPTIONAL, NOT REQUIRED IN THE PROBLEM ================================
+=> FUCK IT. My DEADASS brain has spent more time this "UNNECESSARY" tasks more than the Actual Problem.
+   I losing weight due to lost of Braincells.
+
+4. Inputing multiple-digit number
 - Inputing process is done by looped subroutine that breaks when the inputed character is newline character (ASCII-10) or non-integer character.
 - The loop: We store the first inputed integer in a register (intially 0), if another integer inputed to the console, we multiply the current value of that register by 10 and add the latest intputed integer.
 Example: 3     = 0 x10 +3    
@@ -37,7 +64,7 @@ Example: 3     = 0 x10 +3
 - If '-' character is inputed first, we create a flag with temporary variable to indicated the inputing the number is negative, which give us data to apply the "sign rule", we then do a 2's complement inversion of the number later on when the ansnwer is Negative.
 - While inputing, inputed non-integer characters will output an error message, prompting user to restart the program.
 
-4. Outputing multiple-digit number (answer)
+5. Outputing multiple-digit number (answer)
 - Outputing is done by a subroutine that output each digit of the number from left to right
 - The largest possible digit in LC-3 is tens of thousands, each digit of number is print out by outputing the Quotient result from the divsion of that number by 10000, 1000, 100, 10 consecutively, the next division is perfomed using the Remainder of previous division.
 - If the flag indicating signed number is true, first print out '-' character
