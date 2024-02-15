@@ -1,3 +1,4 @@
+NOTE: if you create another subroutine that use OUTPUT Sub then don't re-use SAVE and SAVE_2, because OUTPUT will modify it after called. 
 =================== Version 1 ================
 - Print out unsigned integer ( 0 to 65535 )
 - Print out number stored in R6
@@ -18,5 +19,5 @@
 - Registers used: R0, R6, R5, R7(RET)
 
 ___________________________________________________________________________________________
-FUTURE modification:
+FUTURE UPDATE: 
 - Reduce the number of Register used. Currently used up to 4.
