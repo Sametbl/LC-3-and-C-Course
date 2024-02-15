@@ -5,9 +5,9 @@
 ; Allow signed integer ( -32768 -> 32767 )
 ; Algorithm: 
  - Create a sign indicating variable (flag), idealy 2-bit. 
- - flag == 0, both numerator & denominator > 0       => result = |num1| / |num2|      ; Quotient & Remainder > 0 
- - flag == 1, either numerator OR denominator < 0    => result = - |num1| / |num2|    ; Quotient & Remainder < 0
- - flag == 2, both numerator & denominator < 0       =? result = |num1| / |num2|      ; Quotient > 0, Remainder < 0
+ - flag == 0, both numerator & denominator > 0       => Quotient = |num1| / |num2|      ; Quotient & Remainder > 0 
+ - flag == 1, either numerator OR denominator < 0    => Quotient = - |num1| / |num2|    ; Quotient & Remainder < 0
+ - flag == 2, both numerator & denominator < 0       => Quotient = |num1| / |num2|      ; Quotient > 0, Remainder < 0
 ===> Remainder < 0 when flag != 0
 ===> This idea is deduced from the fact:    Numerator = (Demoniator * Quotient)  + Remainder
               Ex : -27 divide by 6   , Quo = -4 & Rei = -3       ; Because  -27 =  6 * (-4) + -3
