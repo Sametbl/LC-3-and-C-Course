@@ -6,12 +6,21 @@ MODIFICATION NOTE
 - Register used : R1, R2, R3
 - Cannot work with signed integer
 - Range: 0 -> 65535
+- Result of 0/0 is 0
 
-=========== VERSION 2 =============
+=========== VERSION 2 ==============
+- Divide R1 by R2, and does not change values of R1, R2
+- Store Quotient and Remainder in x5000 (or R3) and x5001
+- Register used : R1, R2, R3
+- Cannot work with signed integer
+- Range: 0 -> 65535
+- Zero divide by 0 will have no result and print out "Math Error" message
+
+=========== VERSION 3 =============
 - Divide x4000 by x40001 ( LABEL: num1 and num2)
 - Store in Quotient and Remainder in x5000 (or R3) and x5001
 - Register used R1, R2, R3
 - Cannot work with signed integer
 - Range: 0 -> 65535
 
-=========== VERSION 3 ==============
+=========== VERSION 4 ==============
