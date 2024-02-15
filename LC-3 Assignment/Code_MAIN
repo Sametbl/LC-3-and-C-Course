@@ -1,11 +1,8 @@
-;Show the systematic decomposition of the process of dividing two integers (NEGATIVE and POSITIVE). 
 ; Requirements:
 ; - Program starting at locaiton x3000 
 ; - The program divides the number in memory location x4000 by the number in memory location x4001   ( addr(x4000) / addr(x4001)
 ; - Stores the QUOTIENT at x5000 and the REMAINDER at x5001
 
-; Version update: for testing purpose, this version ask user to input numbers to x4000 and 4001. 
-; ---------------------- Le Program -----------------
 .ORIG x3000
 msg1     .STRINGZ "Number stored in x4000: a = "
                     LEA R0, msg1          ; Output x4000 (for testing)
@@ -21,7 +18,7 @@ msg2     .STRINGZ "Number stored in x4001: b = "
                     LDI R6, num2
                     JSR OUTPUT
 
-msg3     .STRINGZ "\nCalculating a/b...\n"
+msg3     .STRINGZ "\nCalculating a/b ...\n"
                     LD  R0, TEN           ; newline character
                     OUT  
                     LEA R0, msg3       ; Informing the operation 
