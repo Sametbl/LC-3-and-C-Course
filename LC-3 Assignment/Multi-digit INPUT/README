@@ -26,4 +26,5 @@ MODIFICATION NOTES
 __________________________________________________________________________________________________
 FUTURE modification:
 - Check if the inputed number is out of range: either ( 0 -> 65535 ) or ( -35768 -> 35767 )
+- Invalid input will prompt user to re-enter, instead of error message
 
