@@ -37,7 +37,7 @@ MAIN_LOOP        GETC
                  OUT
                  ST  R0, tmp        
                  ADD R0, R0, #-10   
-                 BRz EXIT   
+                 BRz PRE_EXIT   
 
 CHECK            LD  R7, tmp        
                  LD  R0, De_ASCII   
@@ -69,12 +69,12 @@ X_LOOP           ST  R0, tmp3
                  BRp X_LOOP         
                  RET              
             
-EXIT             LD  R0, flag
+PRE_EXIT         LD  R0, flag
                  ADD R0, R0, #-1    
                  BRnp EXIT_REAL     
                  NOT R6, R6
                  ADD R6, R6, #1    
-EXIT_REAL        LD  R7, SAVE
+EXIT        LD  R7, SAVE
                  JMP R7
               
 ERROR            LD R0, TEN
