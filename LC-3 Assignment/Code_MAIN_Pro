@@ -60,7 +60,11 @@ msgRei   .STRINGZ "The result Remainda: "
                     JSR OUTPUT
                     JSR ENDING                    
                     HALT
-              
+
+num1     .FILL x4000
+num2     .FILL x4001 
+QUOTI    .FILL x5000
+REMAIN   .FILL x5001
 ;======================== Subroutines =================================
 
 DIVISION    ST  R7, SAVE       ; SAVE return address
@@ -136,12 +140,7 @@ MATH_ERROR  LEA R0, math_error
             PUTS
             JSR EXIT
 
-num1     .FILL x4000
-num2     .FILL x4001 
-QUOTI    .FILL x5000
-REMAIN   .FILL x5001
 math_error .STRINGZ "MATH ERROR"
-space    .STRINGZ "\n\n" 
 TEN      .FILL x000A        
 De_ASCII .FILL #-48          
 tmp      .BLKW x0001
