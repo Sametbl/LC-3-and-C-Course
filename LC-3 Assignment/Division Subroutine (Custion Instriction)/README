@@ -14,7 +14,7 @@ MODIFICATION NOTE
 - Register used : R1, R2, R3
 - Cannot work with signed integer
 - Range: 0 -> 65535
-- Zero divide by 0 will have no result and print out "Math Error" message
+- Operation that divide by 0 will have no result and print out "Math Error" message
 
 =========== VERSION 3 =============
 - Divide x4000 by x40001 ( LABEL: num1 and num2)
