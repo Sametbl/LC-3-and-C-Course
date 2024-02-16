@@ -40,13 +40,9 @@ MAIN_LOOP        GETC
                  BRz PRE_EXIT       ; If true, stop inputing and exit
 INITIAL_JUMP     JSR CHECK
                  JSR X10_R6         ; R6 = R6 x10
-                 LD  R0, tmp        ; Load temporary saved input number(ASCII) to R0
-                 ST  R6, tmp        ; Temporary save R6
-                 LD  R6, De_ASCII   ; R6 = -48 
-                 ADD R0, R0, R6     ; R0 = lastest digit  
-                 LD  R6, tmp        ; Return R6
-                 ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
-                 JSR MAIN_LOOP      ; do INPUT loop
+                 LD  R0, tmp        ; After CHECK, tmp already store De_ASCII number
+                 ADD R6, R6, R0     
+                 JSR MAIN_LOOP      
 
 X10_R6           ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
                  ST  R0, tmp2
@@ -65,6 +61,7 @@ CHECK            ST  R7, tmp2
                  LD  R7, tmp       
                  LD  R0, De_ASCII   ; chech if 47 < R0 < 58
                  ADD R0, R7, R0     ; R0 = R7 - 48
+                 ST  R0, tmp        ; for convenient, store De_ASCIIed number
                  BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
                  ADD R0, R0, #-9    ; R0 = (R7 - 48) - 10
                  BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
