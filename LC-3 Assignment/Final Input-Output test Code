@@ -1,5 +1,20 @@
 ; The subroutine for INPUT and OUTPUT module used: Multi_digit INPUT .v4.2  +  Multi_digit OUTPUT .v3
+; ==================== INPUT-OUTPUT check list ================
+; - Small number input check (0 to 9)
+; - Large number input check (above 10)
+; - Max number input (32767 or -32768 )
+; - Add a bunch 0's before actual number
 
+; - Do 4 list above but for Negative input check
+; - Off range check
+; - Check actual value in address, not displayed
+; - Non-number character check
+; - '-' check, it should only allowed once
+; - '-' in the middle of number check
+; - Add non-numberic character as last digit and check
+; =====>  Final check: does ERROR message indicate the correct type of error
+
+---------------------- Le Code ---------------
 .ORIG x3000
 msg         .STRINGZ "Enter number (-32768 to 32767):  "
             LEA R0, msg
