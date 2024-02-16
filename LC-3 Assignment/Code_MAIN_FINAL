@@ -14,11 +14,16 @@ instruction .STRINGZ "Note 1: The acceptable integer range: -32768 to 32767\nNot
 plz1     .STRINGZ ">> Plz input an integer to x4000: a = "           
                     LEA R0, plz1          ; input x4000
                     PUTS
+                    AND R0, R0, #0
+                    STI R0, current_var
                     JSR INPUT
                     STI R6, num1
 plz2     .STRINGZ ">> Plz input an integer to x4001: b = "       
                     LEA R0, plz2          ; input x4001
                     PUTS
+                    AND R0, R0, #0
+                    ADD R0, R0, #1
+                    STI R0, current_var
                     JSR INPUT
                     STI R6, num2
 
@@ -73,6 +78,7 @@ REMAIN   .FILL x5001
 tmp      .BLKW x0001
 SAVE     .BLKW x0001 
 flag     .BLKW x0001
+current_var .FILL x6000    ; Don't mind this, it's just for aesthetic display
 
 ;======================== Subroutines =================================
 DIVISION    ST  R7, SAVE       ; SAVE return address
@@ -263,26 +269,44 @@ ERROR            LD R0, TEN_2
                  OUT
                  LEA R0, error
                  PUTS
-                 JSR INITIAL_LOOP
+                 JSR RE_INPUT_INDICATION
+                 JSR INITIAL_LOOP   
 
 
 EXCEEDED         LD R0, TEN_2
                  OUT
                  LEA R0, exceed
                  PUTS
+                 JSR RE_INPUT_INDICATION
                  JSR INITIAL_LOOP 
 
+RE_INPUT_INDICATION          ST  R7, temp
+                             LDI R6, current_var_2
+                             ADD R6, R6, #0
+                             BRz RE_a
+                             LEA R0, re_b
+                             PUTS
+                             LD  R7, temp
+                             JMP R7
+
+RE_a                         LEA R0, re_a
+                             PUTS 
+                             LD  R7, temp
+                             JMP R7
 ;||||||||||||||||||||||||||||| VARIABLES DECLARATION station 2 ||||||||||||||||||||||||||
-TEN_2       .FILL #10
-De_ASCII_2  .FILL #-48
-four_dig    .FILL #3276  
-SAVE_2      .BLKW x0001    ; Can't use 'SAVE' because it out of range at this point
-flag_2      .BLKW x0001    ; Can't use 'flag' either
-temp        .BLKW x0001    ; Not confuse with tmp , I repeat tmp != temp
-tmp2        .BLKW x0001  
-tmp3        .BLKW x0001
-error       .STRINGZ "Invalid input, please enter again: "     
-exceed      .STRINGZ "Inputed number is Out of Range, please enter again: "
+TEN_2          .FILL #10
+De_ASCII_2     .FILL #-48
+four_dig       .FILL #3276  
+SAVE_2         .BLKW x0001    ; Can't use 'SAVE' because it out of range at this point
+flag_2         .BLKW x0001    ; Can't use 'flag' either
+temp           .BLKW x0001    ; Not confuse with tmp , I repeat tmp != temp
+tmp2           .BLKW x0001  
+tmp3           .BLKW x0001
+current_var_2  .FILL x6000    ; value: '0' for a, and '1' for b
+re_a           .STRINGZ "a = "
+re_b           .STRINGZ "b = "
+error          .STRINGZ "Invalid input, please enter again: "     
+exceed         .STRINGZ "Inputed number is Out of Range, please enter again: "
 ;------------------- OUTPUT SUBROUTINE -----------------
 OUTPUT        ST  R7, SAVE_2
               AND R0, R0, #0        ; R0 = 0
@@ -385,6 +409,8 @@ ENDING       ST  R7, temp       ; Not SAVE_2 or SAVE_3, becaue OUTPUT subroutine
 
              LEA R0, SENT5
              PUTS
+             LEA R0, SENT6
+             PUTS
              LD  R7, temp
              JMP R7
 
@@ -398,5 +424,6 @@ SENT2   .STRINGZ " = "
 SENT3   .STRINGZ " * "
 SENT4   .STRINGZ "  + "
 SENT5   .STRINGZ "\n(Numerator) = (Denominator) * (Quotient)  + (Remainder)\n"
+SENT6   .STRINGZ "\n## Code by: Luong Thanh Vy - an Intellectual Disorder motherfucker. ##\n"
 
 .END
