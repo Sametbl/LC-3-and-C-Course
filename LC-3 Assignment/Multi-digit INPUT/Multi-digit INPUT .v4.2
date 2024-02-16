@@ -1,0 +1,156 @@
+; ================= Version 4.2 modification ===================
+; - This version will prevent user from inputing number that is out of range ( -32768 to 32767 )
+; - If the number inputed is invalid, instead of prompt user to restart program, the program will ask user to re-enter input
+
+; Algorithm: 
+; >> Re-enter input: In the "ERROR" subroutine, change to print out Prompt instead of error message and jump back to INPUT loop, after deleting previous input.
+; >> Out of Range check:
+;    - The INPUT loop will break down to 1 + 3 + 1 loop, allowing only 5 digits input.
+;    - The first 4 loops check if the first 4 digits is less than 3276 or not ( as the first 4 digits in "-32768" and "32767" )
+     - After first 4 loops, check if  [ 3276 - X10_R6 = 0 ]  then [ 3276 - X10_R6 > 0]:
+          [ 3276 - X10_R6 = 0 ]
+                 =>    FALSE: move on to check [ 3276 - X10_R6 > 0]    
+                 =>    TRUE:  loop 5 allow last digit but with condition that is less than 8 or 9 (if signed = true)
+
+          [ 3276 - X10_R6 > 0 ]
+                 =>    FALSE: loop 5 allow last digit with no restriction
+                 =>    TRUE:  wait for "enter", if another digit is inputed => ERROR subroutine
+
+; WARNING: this code this long AS FUCK. What idiot came up with such a solution that can suck someone's d*ck.
+;          Imagine the only programing skill you know is If-else statement . FUCK THIS.
+
+; ================ Important Notes ==================
+; Registers involve: R0, R6 and R7 (RET)
+; R6 is the Output integer
+
+INPUT            ST  R7, SAVE       ; Store return address
+INITIAL_LOOP      AND R6, R6, #0     ; make sure R6 = 0
+                 AND R0, R0, #0    
+                 ST  R0, flag       ; flag = 0: the input expected to be unsigned
+                 GETC
+                 OUT
+                 ST  R0, tmp        ; If R0 is a digit, save it and check it later
+                 ADD R0, R0, #-15   ; Because ADD instruction immediate field is between -16 and 15
+                 ADD R0, R0, #-15
+                 ADD R0, R0, #-15   ; Overall : R0 = R0 - 45  (check for '-' character)
+                 BRz IS_SIGNED
+                 JSR CHECK          ; if not '-' character, continue inputing, but firstly, check whether the current character a number or non-number.
+                 JSR MAIN_LOOP
+
+IS_SIGNED        AND R0, R0, #0
+                 ADD R0, R0, #1
+                 ST  R0, flag       ; flag = 1: the current inputing number is signed
+                 JSR MAIN_LOOP
+
+MAIN_LOOP        GETC      
+                 OUT
+                 ST  R0, tmp        ; Temporary save R0, to check for Newline character
+                 ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
+                 BRz PRE_EXIT       ; If true, stop inputing and exit
+
+CHECK            LD  R7, tmp        ; R7 = inputed character
+                 LD  R0, De_ASCII   ; chech if 47 < R0 < 58
+                 ADD R0, R7, R0     ; R0 = R7 - 48
+                 BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
+                 ADD R0, R0, #-9    ; R0 = (R7 - 48) - 9
+                 BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
+    
+                 JSR X10_R6         ; R6 = R6 x10              
+                 LD  R0, tmp        ; Load temporary saved input number(ASCII) to R0
+                 ST  R6, tmp        ; Temporary save R6
+                 LD  R6, De_ASCII   ; R6 = -48 
+                 ADD R0, R0, R6     ; R0 = lastest digit  
+                 LD  R6, tmp        ; Return R6
+                 ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
+                 
+                 ADD R7, R6, #0     ; R7 = R6  (we don't need R7 to return anywhere)
+                 NOT R7, R7
+                 ADD R7, R7, #1
+                 ST  R7, tmp        ; tmp = -R6
+                 LD  R0, four_dig   ; R0 = 3276  
+                 ADD R7, R0, R7     ; R7 = 3276 - R6     (R6 = R7)
+                 BRz LAST_DIGIT
+                 LD  R7, tmp
+                 ADD R7, R0, R7     ; again R7 = 3276 - R6
+                 BRp MAIN_LOOP      ; if R6 < 3276, fith digit with no restriction
+                 GETC               ; else check for "enter"
+                 OUT                
+                 ST  R0, tmp        
+                 ADD R0, R0, #-10 
+                 BRz PRE_EXIT
+                 JSR EXCEEDED       ; any other character include number input is ERROR
+
+LAST_DIGIT       GETC      
+                 OUT
+                 ST  R0, tmp        ; Temporary save R0, to check for Newline character
+                 ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
+                 BRz PRE_EXIT       ; If true, stop inputing and exit
+                 
+                 LD  R7, tmp        ; R7 = inputed character
+                 LD  R0, De_ASCII   ; chech if 47 < R0 < 58
+                 ADD R0, R7, R0     ; R0 = R7 - 48
+                 ST  R0, tmp        ; R0 = number, store it now for convenient
+                 BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
+                 ADD R0, R0, #-9    ; R0 = (R7 - 48) - 9
+                 BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
+                 LD  R7, flag
+                 ADD R7, R7, #-1    ; check for current number is signed
+                 BRz EXCEED_SIGNED
+                 LD  R7, tmp
+                 ADD R7, R7, #-7
+                 BRp EXCEEDED
+                 JSR ACCEPT
+
+EXCEED_SIGNED    LD  R7, tmp        ; R7 last digit (already De_ASCII)
+                 ADD R7, R7, #-8
+                 BRp EXCEEDED            
+ACCEPT           JSR X10_R6         ; R6 = R6 x10              
+                 LD  R0, tmp        ; Load temporary saved input number(ASCII) to R0
+                 ADD R6, R6, R0     
+                 LD  R0, TEN
+                 OUT                ; newline
+                 JSR MAIN_LOOP      ; WAIT for enter, or check for any other input (surely will lead to EXCEEDED or ERROR
+
+
+X10_R6           ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
+                 ST  R0, tmp2
+                 AND R6, R6, #0     ; R6 = 0   
+                 LD  R0, TEN        ; R0 = 10
+X_LOOP           ST  R0, tmp3       
+                 LD  R0, tmp2       ; tmp2 = a
+                 ADD R6, R6, R0     ; R6 = R6 + a
+                 LD  R0, tmp3       ; tmp3 initally = 10 
+                 ADD R0, R0, #-1    ; tmp3--    
+                 BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
+                 RET                ; else Return
+            
+PRE_EXIT         LD  R0, flag
+                 ADD R0, R0, #-1    ;
+                 BRnp EXIT          ; if (flag -1) != 0, actually exiting
+                 NOT R6, R6
+                 ADD R6, R6, #1     ; if (flag -1) == 0, invert R6 before exit
+EXIT             LD  R7, SAVE
+                 JMP R7
+              
+ERROR            LD R0, TEN
+                 OUT
+                 LEA R0, error
+                 PUTS
+                 JSR INITIAL_LOOP
+
+EXCEEDED         LD R0, TEN
+                 OUT
+                 LEA R0, exceed
+                 PUTS
+                 JSR INITIAL_LOOP 
+         
+flag        .BLKW x0001
+tmp         .BLKW x0001
+tmp2        .BLKW x0001  
+tmp3        .BLKW x0001
+SAVE        .BLKW x0001
+TEN         .FILL x000A
+four_dig    .FILL #3276
+De_ASCII    .FILL #-48
+error       .STRINGZ "Invalid input, please enter again: "  
+exceed      .STRINGZ "Inputed number is Out of Range, please enter again: "
