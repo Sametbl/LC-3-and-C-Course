@@ -1,10 +1,11 @@
 ; LAST UPDATE: 
-- Invalid input will prompt user to re-enter input, instead of printing out error message
-- Inform user if the input exceed the outside the Input range ( -32768 to 32767 ) and prompt user to re-enter.
-
+; - Invalid input will prompt user to re-enter input, instead of printing out error message
+; - Inform user if the input exceed the outside the Input range ( -32768 to 32767 ) and prompt user to re-enter.
 
 ; - The program divides the number in memory location x4000 by the number in memory location x4001   ( addr(x4000) / addr(x4001)
 ; - Stores the QUOTIENT at x5000 and the REMAINDER at x5001
+
+; --------------------- Le Code ------------------
 
 .ORIG x3000
 instruction .STRINGZ "Note 1: The acceptable integer range: -32768 to 32767\nNote 2: Non-numberic character entered will Halt the program\nNote 3: '-' only enter once to indicate negative number\n"
@@ -58,15 +59,22 @@ msgRei   .STRINGZ "=> The result Remainda: "
                     PUTS
                     LDI R6, REMAIN
                     JSR OUTPUT
+
                     JSR ENDING                    
                     HALT
 
+;|||||||||||||||||||||||||| VARIABLES DECLARATION station 1 |||||||||||||||||||
+TEN      .FILL x000A        
+De_ASCII .FILL #-48          
 num1     .FILL x4000
 num2     .FILL x4001 
 QUOTI    .FILL x5000
 REMAIN   .FILL x5001
-;======================== Subroutines =================================
+tmp      .BLKW x0001
+SAVE     .BLKW x0001 
+flag     .BLKW x0001
 
+;======================== Subroutines =================================
 DIVISION    ST  R7, SAVE       ; SAVE return address
             AND R1, R1, #0
             ST  R1, flag       ; init flag = 0
@@ -106,8 +114,8 @@ LOOP        ST  R1, tmp        ; Temporary save the previous value of R1 before 
             LDI  R3, REMAIN     ; Invert Remainder
             NOT R3, R3
             ADD R3, R3, #1    
-            STI  R3, REMAIN     ; Store the inverted Remainder
-            LDI  R3, QUOTI      ; Invert Quotient
+            STI R3, REMAIN     ; Store the inverted Remainder
+            LDI R3, QUOTI      ; Invert Quotient
             NOT R3, R3
             ADD R3, R3, #1
             STI R3, QUOTI      ; Store the inverted Quotient
@@ -135,105 +143,158 @@ ABS_R3      ADD R3, R3, #0
 INVERT_R3   NOT R3, R3          ; |R3| = -R3 , for R3 < 0
             ADD R3, R3, #1 
             RET
-            
+
+math_error .STRINGZ "----- MATH ERROR -----\nCannot divide by 0.\n"
 MATH_ERROR  LEA R0, math_error
             PUTS
             HALT
 
-TEN      .FILL x000A        
-De_ASCII .FILL #-48          
-tmp      .BLKW x0001
-math_error .STRINGZ "----- MATH ERROR -----\nCannot divide by 0.\n"
+EXIT        LD  R7, SAVE
+            JMP R7
+;===========================================================================
+; This line is the seperate 2 codes, that use different variable declaration
+;===========================================================================
+
+; This is case SAVE_2 is used instead of SAVE
+; Therefore EXIT is recreated as EXIT_2 in PRE_EXIT
 
 ; -------------- INPUT SUBROUTINE ----------------------
-INPUT            ST  R7, SAVE       ; Store return address
-                 AND R6, R6, #0     ; make sure R6 = 0
-INTIAL_LOOP      AND R0, R0, #0    
-                 ST  R0, flag       ; flag = 0: the input expected to be unsigned
+INPUT            ST  R7, SAVE_2       ; Store return address
+INITIAL_LOOP     AND R6, R6, #0     ; make sure R6 = 0
+                 AND R0, R0, #0    
+                 ST  R0, flag_2     ; flag = 0: the input expected to be unsigned
                  GETC
                  OUT
-                 ST  R0, tmp        ; If R0 is a digit, save it and check it later
+                 ST  R0, temp        ; If R0 is a digit, save it and check it later
                  ADD R0, R0, #-15   ; Because ADD instruction immediate field is between -16 and 15
                  ADD R0, R0, #-15
                  ADD R0, R0, #-15   ; Overall : R0 = R0 - 45  (check for '-' character)
                  BRz IS_SIGNED
-                 JSR CHECK          ; if not '-' character, continue inputing, but firstly, check whether the current character a number or non-number.
-
-                 JSR MAIN_LOOP
+                 JSR INITAL_JUMP    ; if not '-' character, continue inputing, but firstly, check whether the current character a number or non-number.
 
 IS_SIGNED        AND R0, R0, #0
                  ADD R0, R0, #1
-                 ST  R0, flag       ; flag = 1: the current inputing number is signed
+                 ST  R0, flag_2     ; flag = 1: the current inputing number is signed
                  JSR MAIN_LOOP
 
 MAIN_LOOP        GETC      
                  OUT
-                 ST  R0, tmp        ; Temporary save R0, to check for Newline character
+                 ST  R0, temp        ; Temporary save R0, to check for Newline character
                  ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
                  BRz PRE_EXIT       ; If true, stop inputing and exit
-
-CHECK            LD  R7, tmp        ; R7 = inputed character
-                 LD  R0, De_ASCII   ; chech if 47 < R0 < 58
-                 ADD R0, R7, R0     ; R0 = R7 - 48
-                 BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
-                 ADD R0, R0, #-9    ; R0 = (R7 - 48) - 10
-                 BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
-    
-                 JSR X10_R6         ; R6 = R6 x10
-
-                 LD  R0, tmp        ; Load temporary saved input number(ASCII) to R0
-                 ST  R6, tmp        ; Temporary save R6
-                 LD  R6, De_ASCII   ; R6 = -48 
-                 ADD R0, R0, R6     ; R0 = lastest digit  
-                 LD  R6, tmp        ; Return R6
+INITAL_JUMP      JSR CHECK          ; JUMP TO CHECK subroutine to check for non-numberic chars
+                 JSR X10_R6         ; R6 = R6 x10              
+                 LD  R0, temp        ; After CHECK, tmp already store the De_ASCIIed number
                  ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
-                 JSR MAIN_LOOP      ; do INPUT loop
+; This part examine cases to check for Out of Range                 
+                 ADD R7, R6, #0     ; R7 = R6  (we don't need R7 to return anywhere)
+                 NOT R7, R7
+                 ADD R7, R7, #1
+                 ST  R7, temp        ; tmp = -R6
+                 LD  R0, four_dig   ; R0 = 3276  
+                 ADD R7, R0, R7     ; R7 = 3276 - R6     (R6 = R7)
+                 BRz LAST_DIGIT
+                 LD  R7, temp
+                 ADD R7, R0, R7     ; again R7 = 3276 - R6
+                 BRp MAIN_LOOP      ; if R6 < 3276, fith digit with no restriction
+WAIT_ENTER       GETC               ; else check for "enter"
+                 OUT                
+                 ST  R0, temp        
+                 ADD R0, R0, #-10 
+                 BRz PRE_EXIT
+                 JSR CHECK          ; any other character include number input is ERROR, or EXCEED if its a number
+                 JSR EXCEEDED       
+
+LAST_DIGIT       GETC      
+                 OUT
+                 ST  R0, temp        
+                 ADD R0, R0, #-10  
+                 BRz PRE_EXIT       
+                 JSR CHECK
+                 LD  R7, flag_2
+                 ADD R7, R7, #-1    ; check for current number is signed
+                 BRz EXCEED_SIGNED  ; if true last digit limit is 8
+                 LD  R7, temp        ;             
+                 ADD R7, R7, #-7    ; else last digit limit is 7
+                 BRp EXCEEDED       ; "EXCEED" error message and prompt user
+                 JSR ACCEPT         ; else accepts last digit
+
+EXCEED_SIGNED    LD  R7, temp        ; R7 last digit (already De_ASCII)
+                 ADD R7, R7, #-8
+                 BRp EXCEEDED            
+ACCEPT           JSR X10_R6         ; R6 = R6 x10              
+                 LD  R0, temp        ; Load number
+                 ADD R6, R6, R0     
+                 JSR WAIT_ENTER     ; WAIT for enter, or check for any other input (surely will lead to EXCEEDED or ERROR
 
 X10_R6           ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
                  ST  R0, tmp2
                  AND R6, R6, #0     ; R6 = 0   
-                 LD  R0, TEN        ; R0 = 10
-; ------------------- Multiplication loop --------------------
-X_LOOP           ST  R0, tmp3
+                 LD  R0, TEN_2      ; R0 = 10
+X_LOOP           ST  R0, tmp3       
                  LD  R0, tmp2       ; tmp2 = a
                  ADD R6, R6, R0     ; R6 = R6 + a
                  LD  R0, tmp3       ; tmp3 initally = 10 
                  ADD R0, R0, #-1    ; tmp3--    
                  BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
                  RET                ; else Return
-;-------------------------------            
-PRE_EXIT         LD  R0, flag
-                 ADD R0, R0, #-1    ;
-                 BRnp EXIT          ; if (flag -1) != 0, actually exiting
+                 
+; CHECK Subroutine note: tmp initally store inputed character, tmp2 store return address
+CHECK            ST  R7, tmp2
+                 LD  R7, temp        ; 
+                 LD  R0, De_ASCII_2 ; chech if 47 < R0 < 58
+                 ADD R0, R7, R0     ; R0 = R7 - 48
+                 ST  R0, temp        ; For convenient, store the De_ASCIIed number
+                 BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
+                 ADD R0, R0, #-9    ; R0 = (R7 - 48) - 9
+                 BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
+                 LD  R7, tmp2
+                 JMP R7
+                 
+PRE_EXIT         LD  R0, flag_2
+                 ADD R0, R0, #-1    
+                 BRnp EXIT_2        ; if (flag -1) != 0, actually exiting
                  NOT R6, R6
                  ADD R6, R6, #1     ; if (flag -1) == 0, invert R6 before exit
-EXIT             LD  R7, SAVE
+EXIT_2           LD  R7, SAVE_2
                  JMP R7
-              
-ERROR            LD R0, TEN
+           
+ERROR            LD R0, TEN_2
                  OUT
                  LEA R0, error
                  PUTS
-                 HALT
-                 
-flag        .BLKW x0001
+                 JSR INITIAL_LOOP
+
+
+EXCEEDED         LD R0, TEN_2
+                 OUT
+                 LEA R0, exceed
+                 PUTS
+                 JSR INITIAL_LOOP 
+
+;||||||||||||||||||||||||||||| VARIABLES DECLARATION station 2 ||||||||||||||||||||||||||
+TEN_2       .FILL #10
+De_ASCII_2  .FILL #-48
+four_dig    .FILL #3276  
+SAVE_2      .BLKW x0001    ; Can't use 'SAVE' because it out of range at this point
+flag_2      .BLKW x0001    ; Can't use 'flag' either
+temp        .BLKW x0001    ; Not confuse with tmp , I repeat tmp != temp
 tmp2        .BLKW x0001  
 tmp3        .BLKW x0001
-SAVE        .BLKW x0001
-error       .STRINGZ "Invalid input, program ended."    
-
+error       .STRINGZ "Invalid input, please enter again: "     
+exceed      .STRINGZ "Inputed number is Out of Range, please enter again: "
 ;------------------- OUTPUT SUBROUTINE -----------------
-OUTPUT        ST  R7, SAVE
-              AND R0, R0, #0     ; R0 = 0
+OUTPUT        ST  R7, SAVE_2
+              AND R0, R0, #0        ; R0 = 0
               ADD R0, R0, #1
-              ST  R0, flag       ; flag = 1, not allow printing 0's until first non-zero digit
+              ST  R0, flag_2        ; flag = 1, not allow printing 0's until first non-zero digit
 
               ADD R6, R6, #0        ; R6 unchanged, this line is to apply the brnach condition
-              BRzp MAIN_OUTPUT       ; if R6 >= 0, just continue printing the damn number
+              BRzp MAIN_OUTPUT      ; if R6 >= 0, just continue printing the damn number
                 
               NOT R6, R6
               ADD R6, R6, #1        ; When R6 < 0,  |R6| = -R6
-              LD  R0, De_ASCII      ; R0 = -48
+              LD  R0, De_ASCII_2    ; R0 = -48
               ADD R0, R0, #3        ; R0 = -45
               NOT R0, R0
               ADD R0, R0, #1        ; R0 = 45 ('-' character)
@@ -245,59 +306,63 @@ MAIN_OUTPUT   LD  R5, VANJ       ; R5 = 10000
               JSR PRINT
               LD  R5, HUNDRED    ; R5 = 100
               JSR PRINT
-              LD  R5, TEN        ; R5 = 10
+              LD  R5, TEN_2      ; R5 = 10
               JSR PRINT          ; now, R6 should less than 10
-
               ADD R5, R6, #0     ; set R5 = R6, check if R6 == 0
-              BRz LAST_ZERO
+              BRz LAST_ZERO      ; In case output is exactly 0
               AND R5, R5, #0     ; else print the last non-zero digit
               ADD R5, R5, #1     ; R5 = 1
               JSR PRINT
-              JSR EXIT          
+              JSR EXIT_2          
               
-LAST_ZERO     LD  R0, De_ASCII   ; R0 = -48
+LAST_ZERO     LD  R0, De_ASCII_2 ; R0 = -48
               NOT R0, R0 
               ADD R0, R0, #1     ; R0 = 48 (zero)
               OUT
-              JSR EXIT      
+              JSR EXIT_2      
               
 
-PRINT         ST  R7, SAVE_2
+PRINT         ST  R7, SAVE_3
               NOT R5, R5
               ADD R5, R5, #1     ; R5 = -R5
               AND R0, R0, #0
 PRINT_LOOP    ADD R0, R0, #1     ; Remainder count
-              ST  R6, tmp        ; Save R6 to restore it later
+              ST  R6, temp        ; Save R6 to restore it later
               ADD R6, R6, R5     ; R6 = R6 - R5
               BRzp PRINT_LOOP    ; If R6 >= 0, continue subtracting
 
-              LD  R6, tmp        ; Restore last value of R6 before it results in negative
+              LD  R6, temp        ; Restore last value of R6 before it results in negative
               ADD R0, R0, #-1    ; Eliminate the last Remainder count that result in negative
               BRnp CONTINUE      ; CONINTUE if R0 is non-zero
 
-              LD  R5, flag       
+              LD  R5, flag_2       
               ADD R5, R5, #0     ; Because Branch condition only apply for ALU operations
               BRz CONTINUE       ; CONTINUE if flag == 0
               RET                ; Not print out anything, continue the next digit
 
 CONTINUE      AND R5, R5, #0
-              ST  R5, flag       ; flag = 0, allow printing 0's
-              LD  R5, De_ASCII   ; R5 = -48
+              ST  R5, flag_2     ; flag = 0, allow printing 0's
+              LD  R5, De_ASCII_2 ; R5 = -48
               NOT R5, R5
               ADD R5, R5, #1     ; R5 = 48
               ADD R0, R0, R5  
               OUT
-              LD  R7, SAVE_2
+              LD  R7, SAVE_3
               JMP R7
 
-
-SAVE_2    .BLKW x0001
+SAVE_3    .BLKW x0001
 HUNDRED   .FILL #100
 THOUSAND  .FILL #1000
 VANJ      .FILL #10000
 
+
+
+
+
+
+
 ;-------------- ENDING CHECK (cuz I laik) ------------------
-ENDING       ST  R7, tmp       ; Not SAVE or SAVE_2, becaue OUTPUT subroutine uses them
+ENDING       ST  R7, temp       ; Not SAVE_2 or SAVE_3, becaue OUTPUT subroutine uses them
              LEA R0, SENT1
              PUTS
              LDI R6, a
@@ -320,7 +385,7 @@ ENDING       ST  R7, tmp       ; Not SAVE or SAVE_2, becaue OUTPUT subroutine us
 
              LEA R0, SENT5
              PUTS
-             LD  R7, tmp
+             LD  R7, temp
              JMP R7
 
 ; At this point, cannot LOAD or STORE labels num1, num2, QUOTI, REAMIN because too far away (offset exceed -256)
