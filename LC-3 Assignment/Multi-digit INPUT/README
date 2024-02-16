@@ -23,8 +23,12 @@ MODIFICATION NOTES
 - Check for non-numberic characters and display error message if detected
 (except for '-' character if it is the first inputed character and not inputed more than twice)
 
-__________________________________________________________________________________________________
-FUTURE modification:
-- Check if the inputed number is out of range: either ( 0 -> 65535 ) or ( -35768 -> 35767 )
-- Invalid input will prompt user to re-enter, instead of error message
+=========== Version 4.2 ===========               (FINAL UPDATE)
+- Multiple digit input ( −32768 to 32767 )
+- Used 3 Registers (R0, R6, R7)
+- Allowing NEGATIVE input number
+- Check for non-numberic characters, except for '-' character if it is the first inputed character and not inputed more than twice
+- Special: Can check if number input is Out of Range
+- Invalid input will not HALT program, instead prompt user to Re-enter.
+
 
