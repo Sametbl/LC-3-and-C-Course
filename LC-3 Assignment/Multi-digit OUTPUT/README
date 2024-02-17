@@ -13,7 +13,7 @@ NOTE: if you create another subroutine that use OUTPUT Sub then don't re-use SAV
 
 =================== Version 3 ================
 - Allow printing out Negative Number
-- Print out unsigned integer ( -32768 to 32767 )  => Go outside this range will print out undesired number
+- Print out unsigned integer ( -32768 to 32767 )  
 - Does not extend to 5 digits
 - Print out number stored in R6
 - Registers used: R0, R6, R5, R7(RET)
