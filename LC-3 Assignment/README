@@ -7,24 +7,24 @@ Show the systematic decomposition of the process of dividing two integers (NEGAT
 Write an LC-3 machine language program starting at locaiton x3000 that divides the number in memory location x4000 by the number in memory location x4001 and stores the quotient at x5000 and the remainder at x5001"
 
 ===================== My approach to the problem ====================
-# Theory and Algorithm #
-1. Algorithm for Division in LC-3
--------------------------------- SOLUTION A ------------------------
-- Division is a loop of substraction, the number of times loop repeated before the subtration result in negative numbers is the Quotient and the remaining number (smaller than divisor) is the Remainder.
-- If division involves negative numbers, this approach is still valid if we take absolute value of these numbers and apply the "sign rule" at the end.
-- The "sign rule" : Same signs - the answer is Positive   ;    Different signs - the answer is Negative
 
-- ISSUE with this solution: when perfoms 0/0, the output is 0, and non-zero number /0 will stucked in infinite loop. This is FUCKED. 
-=> This can easily fixed by additional code. But this proved that this decomposition of division is NOT entirely CORRECT.
+                                        1. ALGORITHM FOR DIVISION IN LC-3
+--------- SOLUTION A ----------
+- Imagine Division is a loop of substraction and the number of times loop repeated before the subtration result in Negative is the Quotient, the remaining number after the last loop (smaller than divisor) is the Remainder.
+     "This is not a real definition, I made up this Shit . But atleast it works so don't touch it"
 
+- ISSUE with this solution: 
+When perfoms divsion with 0, the output is 0 for 0/0, and non-zero number /0 will stucked in infinite loop, which is FUCKING BULLSHIT. 
+"This can easily fixed by additional code. But this proved that this decomposition of division is NOT entirely CORRECT and my brain is full of shit"
 
 => Expecting a solution B 
--------------------------------- SOLUTION B ---------------------------
-... No idea, my brain is fried
+--------- SOLUTION B ----------
+... "No idea, my brain is fricking fried"
 
-2. For division that involve Negative numbers, there are 2 Convention:
-a) Convention 1: Remainder is Positive
-          
+
+
+                    2. FOR DIVISION THAT INVOLVE NEGATIVE NUMBERS, THERE ARE 2 CONVENTION:
+a) Convention 1: Remainder is Positive          
  Remainder = Remainder of (|Numerator| / |Denominator|)
                   Ex:  27 divide by -6   =>     27 = -6 * -4  +3
                   Ex: -27 divide by  6   =>    -27 =  6 * -5  +3
@@ -32,7 +32,8 @@ a) Convention 1: Remainder is Positive
  => Numerator &  Denominator > 0        => Quotient & Remainder > 0     ,  Quotient  =   Quotient
  => Numerator OR Denominator < 0        => Quotient < 0,   Remainder > 0,  Quotient  = -[Quotient +1]
  => Numerator &  Denominator < 0        => Quotient > 0,   Remainder < 0,  Quotient  =   Quotient
-=====> Calculating Quotient will complicated as FUCK
+
+===> "Calculating Quotient will complicated as FUCK. Imagine the amount of if-esle statement required for this shitty ass Convention"
 
 b) Convention 2: Remainder is Negative
                   Ex:  27 divide by -6   =>     27 = -6 * -4  -3
@@ -46,13 +47,22 @@ b) Convention 2: Remainder is Negative
                Remainder = -Remainder          if either Numerator OR Denominator < 0
 =====>  NOICE
 
-3. Size of integers
-- Registers in LC-3 have size of 16-bit, the maxinum signed number LC-3 can represents is -(2^15 - 1) to 2^15 || −32,768 to 32,767, so registers in LC-3 only capable of performing arithmetic operations in this range.
+- Note that the result of Quotient must match the "sign rule".
+- The "sign rule" : Same signs - the answer is Positive   ;    Different signs - the answer is Negative
+===> "Assessing the theory above, this is always true anyway, so no need to concern about this in the code."
 
 
-======================== OPTIONAL, NOT REQUIRED IN THE PROBLEM ================================
-=> FUCK IT. My DEADASS brain has spent more time in this "UNNECESSARY" tasks than the Actual fucking Problem.
-   I losing weight due to lost of Braincells during Tet
+
+                                                  3. SIZE OF INTEGER
+- Registers in LC-3 have size of 16-bit, the maxinum signed number LC-3 can represents is -(2^15 - 1) to 2^15 ,OR, −32,768 to 32,767, so registers in LC-3 only capable of performing arithmetic operations in this range.
+- If the number is unsigned the range will be 0 to 65535.
+          "Everyone know this, why the fck am I explaining this"
+
+
+
+===================================== OPTIONAL, NOT REQUIRED IN THE PROBLEM ====================================
+   "FUCK THIS. My DEADASS brain has spent more time in this "UNNECESSARY" tasks than the Actual fucking Problem."
+   "I losing weight due to lost of Braincells during Tet"
 
 4. Inputing multiple-digit number
 - Inputing process is done by looped subroutine that breaks when the inputed character is newline character (ASCII-10) or non-integer character.
