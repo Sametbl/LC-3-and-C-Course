@@ -75,5 +75,32 @@ Exmaple: 35289 : 10000 = 3 , remains 5289                // Print out : '3'
          89    : 10    = 8 , remains 9                   // Print out ; '8'    then Print out : '9'
  ==>     On console: 35289
 
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+                             MAIN CODE versions features note 
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+=================== Code_MAIN_Lite ====================
+- There is no input, assume the numbers already exist in x4000 and x4001
+- Number range: >> Not yet tested <<
+- Display the current values of x4000 and x4001
+- Calculate and print out result (Quotient and Remainder)
 
-         
+=================== Code_MAIN_PRO =====================
+- Give user instruction and Prompt user to inputs numbers to x4000 and x4001
+- Number range: -32768 to 32767
+- Check for non-numberic character input, if detected, inform user and end program
+- Print out numbers inputed in x4000 and x4001 for Verification
+- Calculate and print out result (Quotient and Remainder)
+- Explain the result
+
+=================== Code_MAIN_FINAL =====================
+- Give user instruction and Prompt user to inputs numbers to x4000 and x4001
+- Number range: -32768 to 32767
+- Check for non-numberic character.
+- Check if inputed number if Out of Range
+- Invalid input will not end the program, but instead ask user to re-enter input
+- Print out numbers inputed in x4000 and x4001 for Verification
+- Calculate and print out result (Quotient and Remainder)
+- Explain the result
+- Show contributor (Pathetic af) 
+
+
