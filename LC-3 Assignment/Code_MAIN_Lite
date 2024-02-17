@@ -38,7 +38,7 @@ msgRei   .STRINGZ "The result Remainda: "
                     PUTS
                     LDI R6, REMAIN
                     JSR OUTPUT                
-                    HALT
+END                 HALT
 
 num1     .FILL x4000
 num2     .FILL x4001 
@@ -117,89 +117,10 @@ INVERT_R3   NOT R3, R3          ; |R3| = -R3 , for R3 < 0
             
 MATH_ERROR  LEA R0, math_error
             PUTS
-            JSR EXIT
+            JSR END
 
-
-math_error .STRINGZ "MATH ERROR"
-TEN      .FILL x000A        
-De_ASCII .FILL #-48          
-tmp      .BLKW x0001
-; -------------- INPUT SUBROUTINE ----------------------
-INPUT            ST  R7, SAVE       ; Store return address
-                 AND R6, R6, #0     ; make sure R6 = 0
-INTIAL_LOOP      AND R0, R0, #0    
-                 ST  R0, flag       ; flag = 0: the input expected to be unsigned
-                 GETC
-                 OUT
-                 ST  R0, tmp        ; If R0 is a digit, save it and check it later
-                 ADD R0, R0, #-15   ; Because ADD instruction immediate field is between -16 and 15
-                 ADD R0, R0, #-15
-                 ADD R0, R0, #-15   ; Overall : R0 = R0 - 45  (check for '-' character)
-                 BRz IS_SIGNED
-                 JSR CHECK          ; if not '-' character, continue inputing, but firstly, check whether the current character a number or non-number.
-
-                 JSR MAIN_LOOP
-
-IS_SIGNED        AND R0, R0, #0
-                 ADD R0, R0, #1
-                 ST  R0, flag       ; flag = 1: the current inputing number is signed
-                 JSR MAIN_LOOP
-
-MAIN_LOOP        GETC      
-                 OUT
-                 ST  R0, tmp        ; Temporary save R0, to check for Newline character
-                 ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
-                 BRz PRE_EXIT       ; If true, stop inputing and exit
-
-CHECK            LD  R7, tmp        ; R7 = inputed character
-                 LD  R0, De_ASCII   ; chech if 47 < R0 < 58
-                 ADD R0, R7, R0     ; R0 = R7 - 48
-                 BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
-                 ADD R0, R0, #-9    ; R0 = (R7 - 48) - 10
-                 BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
-    
-                 JSR X10_R6         ; R6 = R6 x10
-
-                 LD  R0, tmp        ; Load temporary saved input number(ASCII) to R0
-                 ST  R6, tmp        ; Temporary save R6
-                 LD  R6, De_ASCII   ; R6 = -48 
-                 ADD R0, R0, R6     ; R0 = lastest digit  
-                 LD  R6, tmp        ; Return R6
-                 ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
-                 JSR MAIN_LOOP      ; do INPUT loop
-
-X10_R6           ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
-                 ST  R0, tmp2
-                 AND R6, R6, #0     ; R6 = 0   
-                 LD  R0, TEN        ; R0 = 10
-; ------------------- Multiplication loop --------------------
-X_LOOP           ST  R0, tmp3
-                 LD  R0, tmp2       ; tmp2 = a
-                 ADD R6, R6, R0     ; R6 = R6 + a
-                 LD  R0, tmp3       ; tmp3 initally = 10 
-                 ADD R0, R0, #-1    ; tmp3--    
-                 BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
-                 RET                ; else Return
-;-------------------------------            
-PRE_EXIT         LD  R0, flag
-                 ADD R0, R0, #-1    ;
-                 BRnp EXIT          ; if (flag -1) != 0, actually exiting
-                 NOT R6, R6
-                 ADD R6, R6, #1     ; if (flag -1) == 0, invert R6 before exit
-EXIT             LD  R7, SAVE
-                 JMP R7
-              
-ERROR            LD R0, TEN
-                 OUT
-                 LEA R0, error
-                 PUTS
-                 HALT
-                 
-flag        .BLKW x0001
-tmp2        .BLKW x0001  
-tmp3        .BLKW x0001
-SAVE        .BLKW x0001
-error       .STRINGZ "Invalid input, program ended."    
+EXIT        LD  R7, SAVE
+            JMP R7
 
 ;------------------- OUTPUT SUBROUTINE -----------------
 OUTPUT        ST  R7, SAVE
@@ -269,10 +190,16 @@ CONTINUE      AND R5, R5, #0
               LD  R7, SAVE_2
               JMP R7
 
-
+   
+De_ASCII .FILL #-48          
+tmp      .BLKW x0001               
+flag        .BLKW x0001
+SAVE        .BLKW x0001
 SAVE_2    .BLKW x0001
+TEN      .FILL x000A  
 HUNDRED   .FILL #100
 THOUSAND  .FILL #1000
 VANJ      .FILL #10000
+math_error .STRINGZ "MATH ERROR\nCannot divide by 0.\n"
 
 .END
