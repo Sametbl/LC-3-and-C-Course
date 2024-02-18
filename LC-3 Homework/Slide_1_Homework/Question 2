@@ -1,0 +1,102 @@
+.ORIG x3000
+                 LEA R0, prompt1
+                 PUTS
+                 AND R0, R0, #0
+                 ST  R0, var
+                 JSR INPUT
+                 LD  R0, tmp        ; load number (already De_ASCII)
+                 ADD R1, R0, #0     ; R1 = num1
+
+                 LEA R0, prompt2
+                 PUTS
+                 LD  R0, var        ; var initally = 0
+                 ADD R0, R0, #1     ; var is the current "number" inputing, used for re-enter the number if previous is invalid (0 for 'a', 1 for 'b')
+                 ST  R0, var        ; var = 1 
+                 JSR INPUT
+                 LD  R0, tmp        ; load number (already De_ASCII)
+                 ADD R2, R0, #0     ; R2 = num2    
+
+                 JSR R1_chia_R2        ; Result store in R3
+                 LEA R0, result_Q
+                 PUTS
+                 LD  R2, De_ASCII   ; R2 = -48
+                 NOT R2, R2 
+                 ADD R2, R2, #1     ; R2 = 48 
+                 LD  R1 , QUOTI
+                 ADD R0, R1, R2     ; R0 = QUOTI + 48 (for print to console)
+                 OUT
+                 LEA R0, result_R
+                 PUTS
+                 LD  R1, REMAIN
+                 ADD R0, R1, R2     ; R0 = REMAINDER + 48
+                 OUT
+                 HALT
+
+R1_chia_R2  ADD R2, R2, #0     ; Check if R2 == 0 ? Math error
+            BRz MATH_ERROR
+            AND R3, R3, #0     ; init R3 = 0
+            NOT R2, R2
+            ADD R2, R2, #1
+LOOP        ST  R1, tmp        ; Temporary save the previous value of R1 before it becomes Negative
+            ADD R3, R3, #1     ; R3 = number of substraction (QUOTIENT)
+            ADD R1, R1, R2     ; R1 = R1 - R2    
+            BRzp LOOP          ; if R1 >= 0, continue substracting
+            ADD R3, R3, #-1    ; Eliminate the quotient count of substraction that results in Negative
+            ST  R3, QUOTI      ; Store in x5000
+            LD  R1, tmp        ; Load value of R1 before it results in Negative. This is the REMAINDER
+            ST  R1, REMAIN     ; Store in x5001   
+            RET
+
+MATH_ERROR  LEA R0, math_error
+            PUTS
+            HALT
+
+
+INPUT            ST  R7, SAVE       ; Store return address
+MAIN_INPUT       GETC      
+                 OUT
+                 LD  R7, De_ASCII       
+                 ADD R0, R7, R0     ; R0 = R0 - 48
+                 ST  R0, tmp        ; For convenient, store the De_ASCIIed number
+                 BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
+                 ADD R0, R0, #-9    ; R0 = (R7 - 48) - 9
+                 BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
+                 LD  R0, TEN        ; print out newline for aesthetic reason
+                 OUT
+                 JSR EXIT     
+
+EXIT             LD  R7, SAVE
+                 JMP R7
+              
+ERROR            LD R0, TEN
+                 OUT
+                 LEA R0, error
+                 PUTS
+                 LD R0, var
+                 BRp print_b
+                 LEA R0, a_is
+                 PUTS
+                 JSR MAIN_INPUT
+print_b          LEA R0, b_is
+                 PUTS
+                 JSR MAIN_INPUT
+
+tmp         .BLKW x0001
+tmp2        .BLKW x0001
+SAVE        .BLKW x0001
+ans         .BLKW x0001
+TEN         .FILL x000A
+De_ASCII    .FILL #-48
+QUOTI       .BLKW x0001
+REMAIN      .BLKW x0001      
+var         .BLKW x0001
+math_error .STRINGZ "MATH ERROR"
+prompt1     .STRINGZ "Please input a number: a = "
+prompt2     .STRINGZ "Please input a number: b = "
+result_Q    .STRINGZ "\nThe Quotient  of a/b is: " 
+result_R    .STRINGZ "\nThe Remainder of a/b is: " 
+error       .STRINGZ "Invalid input, please enter a number (0 to 9): "  
+a_is        .STRINGZ "a = "
+b_is        .STRINGZ "b = "
+
+.END
