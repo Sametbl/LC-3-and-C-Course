@@ -424,6 +424,6 @@ SENT2   .STRINGZ " = "
 SENT3   .STRINGZ " * "
 SENT4   .STRINGZ "  + "
 SENT5   .STRINGZ "\n(Numerator) = (Denominator) * (Quotient)  + (Remainder)\n"
-SENT6   .STRINGZ "\n## Code by: Luong Thanh Vy - an Intellectual Disorder motherfucker. ##\n"
+SENT6   .STRINGZ "\n## Code by: Luong Thanh Vy - an Idiotic Mental Disorder motherfucker. ##\n"
 
 .END
