@@ -11,175 +11,217 @@
 
 
 .ORIG x3000
-              LEA R0, msg
-              PUTS
-              LEA R0, msg1      ; Prompting for input
-              PUTS
-              JSR INPUT         ; Return multiple-digits input (R6)
-              ST  R6, tmp       ; Save X, R0 is needed for I/O 
-
-       
-              LEA R0, msg2       
-              PUTS
-              JSR INPUT
-              ADD R1, R6, #0    ; R1 = Y
-
-
-              LEA R0, msg3        
-              PUTS
-              JSR INPUT
-              ADD R2, R6, #0    ; R2 = Z
-
-              LD  R0, tmp       ; R0 = X
-              JSR MAX_MIN
-MAIN          LD  R3, Max       ; Labeled MAIN for returning
-              LD  R4, Min
-              LEA R0, msg_MAX   ; "The MAX is..."
-              PUTS
-              ADD R6, R3, #0
-              JSR BCD           ; Printing each digits
-              AND R0, R0, #0
-              ADD R0, R0, #10   ; Newline
-              OUT
-              LEA R0, msg_MIN   ; "The MIN is..."
-              PUTS 
-              ADD R6, R4, #0
-              JSR BCD
-              LD  R0, tmp       ; Restore R0 to X as indicated
-              HALT
-
 msg     .STRINGZ "Please enter unsigned integer (0 to 32767).\n"
 msg1    .STRINGZ "Enter the first integer:  X = "
 msg2    .STRINGZ "Enter the second integer: Y = "
 msg3    .STRINGZ "Enter the third integer:  Z = "
-msg_MAX .STRINGZ "The MAX number in the list is: "
-msg_MIN .STRINGZ "The MIN number in the list is: "
+              AND R0, R0, #0
+              ST  R0, var       ; initially var = 0, ignore this , its for aesthetic purpose only
+
+              LEA R0, msg       ; print out user instruction message 
+              PUTS
+              LEA R0, msg1      ; Prompting for input
+              PUTS
+              JSR INPUT         ; Return multiple-digits input (R6)
+              ST  R6, X         ; Save X
+     
+              LEA R0, msg2       
+              PUTS
+              JSR INPUT
+              ST  R6, Y         ; Store Y
+
+              LEA R0, msg3        
+              PUTS
+              JSR INPUT
+              ST  R6, Z         ; Store Z
+
+              LD R0, X
+              LD R1, Y
+              LD R2, Z          ; Load X,Y,Z to indicated Registers
+              JSR MAX_MIN
+MAIN          LD  R3, Max       ; Labeled MAIN for returning
+              LD  R4, Min
+
+              LEA R0, msg_MAX   ; "The MAX is..."
+              PUTS
+              ADD R6, R3, #0
+              JSR OUTPUT         ; Printing each digits
+              AND R0, R0, #0
+              ADD R0, R0, #10   ; Newline
+              OUT
+
+              LEA R0, msg_MIN   ; "The MIN is..."
+              PUTS 
+              ADD R6, R4, #0
+              JSR OUTPUT
+              LD  R0, tmp       ; Restore R0 to X as indicated
+              HALT
+
+;------------------------ find MAX_MIN Subroutine --------------------------------
+MAX_MIN       ADD R5, R0, #0      ; Load X to R5
+              ST  R5, Max         ; Assume X = Max
+              ST  R5, Min         ; Assume X = Min
+              ADD R5, R1, #0      ; Load Y
+              JSR Compare_MAX        ; Compare MAX
+              JSR Compare_MIN        ; Compare MIN
+              ADD R5, R2, #0      ; Load Z
+              JSR Compare_MAX
+              JSR Compare_MIN
+              JSR MAIN              
+
+Compare_MAX   LD  R3, Max         ; Loop start: Compare R3(MAX) vs R5
+              ADD R6, R5, #0      ; R6 = R5 as temporary variable to compute without affecting R5
+              NOT R6, R6          
+              ADD R6, R6, #1      ; R6 = - R5
+              ADD R3, R3, R6      ; R3 = R3 + R6     or R3 = Max - R5
+              BRn New_MAX         ; If Max < R5 => Max = R5
+              RET                 ; Else return, keep 'max' as it was 
+New_MAX       ST  R5, Max
+              RET
+                         
+Compare_MIN   LD  R4, Min         ; Compare R4(MIN) vs R5
+              ADD R6, R5, #0      ; R6 = R4 as temporary variable
+              NOT R4, R4
+              ADD R4, R4, #1      ; R4 = - R4 = -Min
+              ADD R6, R6, R4      ; R6 = R6 - Min   or R6 = R4 - Min 
+              BRn New_MIN         ; If R4 < Min, R4 (R5) = New Min
+              RET
+New_MIN       ST  R5, Min
+              RET 
+
+
+X          .BLKW x0001
+Y          .BLKW x0001
+Z          .BLKW x0001
 Max        .BLKW x0001
 Min        .BLKW x0001
 tmp        .BLKW x0001
 SAVE       .BLKW x0001
 SAVE_2     .BLKW x0001
-NOT_EXTEN .FILL x0000
-ASCII     .FILL #-48
+flag       .BLKW x0001
+De_ASCII   .FILL #-48
 TEN       .FILL #10
 HUNDRED   .FILL #100
 THOUSAND  .FILL #1000
 VANJ      .FILL #10000
+msg_MAX .STRINGZ "\nThe MAX number in the list is: "
+msg_MIN .STRINGZ "\nThe MIN number in the list is: "
+invalid .STRINGZ "\nInvalid input, please enter numbers again: "
+var     .BLKW x0001     ; To tell the current variable that we are inputing, to display correct variable when re-enter input. 
+X_is    .STRINGZ "X = "        ; indicated by var = 1
+Y_is    .STRINGZ "Y = "        ; indicated by var = 2
+Z_is    .STRINGZ "Z = "        ; indicated by var = 3
 
+ ;--------------------------------- INPUT subroutine ------------------------
 INPUT         ST  R7, SAVE        ; Save initial return Address
-              AND R6, R6, #0      
-LOOP_INPUT    GETC
+              LD  R7, var
+              ADD R7, R7, #1 
+              ST  R7, var         ; var += 1
+INIT_INPUT    AND R6, R6, #0      ; initialize R6
+INPUT_LOOP    GETC
               OUT
-              ADD R5, R0, #0      ; R5 = R0
-              ADD R5, R5, #-10    ; check for newline character
-              BRz EXIT
-              LD  R4, ASCII       ; Check for ASCII < 48
-              ADD R5, R0, #0
-              ADD R5, R5, R4
-              BRn INVALID
-              ADD R5, R0, #0   
-              ADD R4, R4, #-9     ; Check for ASCII >57   
-              ADD R5, R5, R4      
-              BRp INVALID         ; Invalid message
-            
-              LD  R5, ASCII        
-              ADD R0, R0, R5
-              JSR X10_R6          ; 10 x R6, initially R6 = 0
+              ST  R0, tmp         ; Temporary store inputed character
+              ADD R0, R0, #-10    ; check for newline character
+              BRz EXIT            ; Exit if user hit "Enter"
+              JSR CHECK
+              LD  R0, tmp         ; IN "CHECK" character in tmp already De_ASCII-ed
+              JSR X10_R6          ; 10 x R6, initially R6 = 0  , Note this SUB uses R5, R4
               ADD R6, R6, R0
-              BRnzp LOOP_INPUT 
+              JSR INPUT_LOOP
+
+CHECK         LD  R3, tmp         ; Load inputed character
+              LD  R0, De_ASCII    ; De_ASCII = -48, check if 47 < R0 < 58
+              ADD R0, R3, R0      ; R0 = R3 - 48
+              ST  R0, tmp         ; For convenient, store the De_ASCII-ed number to tmp
+              BRn ERROR           ; If R0 < 0, non-numberic character ( <48 )  => ERROR
+              ADD R0, R0, #-9     ; R0 = (R3 - 48) - 9
+              BRp ERROR           ; If R0 > 0, non-numberic character ( >57 )  => also ERROR
+              RET                 ; CHECK PASSED, return
+
+X10_R6        ADD R5, R6, #0        ; R5 = R6
+              AND R6, R6, #0        ; init R6 = 0
+              LD  R4, TEN           ; R4 = 10, countdown from 10, each time add R6 to R6 itself to X10
+LOOP_MUL      ADD R6, R6, R5        ; initially R6 = 0, R6 = R6 + R5   (10 times)
+              ADD R4, R4, #-1       ; Countdown
+              BRp LOOP_MUL
+              RET             
 
 EXIT          LD  R7, SAVE   
               JMP R7          
    
-INVALID       AND R0, R0, #0 
-              ADD R0, R0, #10      ; Newline
-              OUT
-              LEA R0, invalid
+ERROR         LEA R0, invalid
               PUTS
-              HALT
-
-X10_R6        ADD R5, R6, #0
-              AND R6, R6, #0
-              LD  R4, TEN
-LOOP_MUL      ADD R6, R6, R5
-              ADD R4, R4, #-1
-              BRp LOOP_MUL
-              RET              
-
-MAX_MIN       ADD R5, R0, #0      ; Load X to R5
-              ST  R5, Max         ; Assume X = Max
-              ST  R5, Min         ; Assume X = Min
-              ADD R5, R1, #0      ; Load Y
-              JSR LOOP_MAX        ; Compare MAX
-              JSR LOOP_MIN        ; Compare MIN
-              ADD R5, R2, #0      ; Load Z
-              JSR LOOP_MAX
-              JSR LOOP_MIN
-              JSR MAIN              
-
-LOOP_MAX      LD  R3, Max         ;Loop start: Compare R3(MAX) vs R5
-              ADD R6, R5, #0      ; R6 as temp
-              NOT R6, R6          
-              ADD R6, R6, #1      
-              ADD R3, R3, R6      ; R3 = R3 - R5 (or R6)
-              BRn New_MAX         ; If R3 < R5 => Max = R5
-              RET 
-New_MAX       ST  R5, Max
-              RET
-                         
-LOOP_MIN      LD  R4, Min         ; Compare R4(MIN) vs R5
-              ADD R6, R5, #0      ; R6 as temp
-              NOT R4, R4
-              ADD R4, R4, #1
-              ADD R6, R6, R4
-              BRn New_MIN
-              RET
-New_MIN       ST  R5, Min
-              RET 
-
-BCD           ST  R7, SAVE        ;RET caused bug for unknowm reason
-              LD  R5, NOT_EXTEN      
-              AND R5, R5, #0      ; NOT_EXTEN initially = 0
-              ST  R5, NOT_EXTEN
-              LD  R5, VANJ        ; 10000 division
-              JSR PRINT_BCD
-              LD  R5, THOUSAND    ; 1000 division
-              JSR PRINT_BCD
-              LD  R5, HUNDRED     ; 100 division
-              JSR PRINT_BCD
-              LD  R5, TEN         ; 10 division
-              JSR PRINT_BCD
-              ADD R0, R6, R5      ; The last remainder should <10
-              OUT
-; While debugging, RET caused R7 to changed to address of RET and stucked in loop for unknown reason, so I used this method.
-              LD R7, SAVE         
-              JMP R7             
+              LD  R7, var
+              ADD R7, R7, #-1
+              BRz X_IS
+              ADD R7, R7, #-1
+              BRz Y_IS
+              LEA R0, Z_is
+              PUTS
+              JSR INIT_INPUT
+X_IS          LEA R0, X_is
+              PUTS
+              JSR INIT_INPUT
+Y_IS          LEA R0, Y_is
+              PUTS
+              JSR INIT_INPUT
               
-PRINT_BCD     ST R7, SAVE_2
-              NOT R5, R5
-              ADD R5, R5, #1
-              AND R0, R0, #0
-PRINT_LOOP    ST  R6, tmp
+;---------------------------- OUTPUT Subroutine ---------------------------------
+; NOTE: this Subroutine print out R6 
+OUTPUT        ST  R7, SAVE       ; there are JSRs in Subroutine, R7 affected, must store it
+              AND R0, R0, #0     ; R0 = 0
               ADD R0, R0, #1
-              ADD R6, R6, R5
-              BRzp PRINT_LOOP
-              ADD R0, R0, #-1
-              LD  R6, tmp
-              LD  R5, NOT_EXTEN     
-              ADD R5, R5, R0        ;NOT_EXTEN = NOT_EXTEN + digit
-              BRnp PRINT     
-;If sum of all digits != 0 then start printing (Remove extended 0) 
-              LD R7, SAVE_2
-              JMP R7
-PRINT         ST  R5, NOT_EXTEN     ;NOT_EXTEN now !=0
-              LD  R5, ASCII
-              NOT R5, R5
-              ADD R5, R5, #1
-              ADD R0, R0, R5
-              OUT
-              LD  R7, SAVE_2      ;RET caused Bug for unknown reason
-              JMP R7                         
+              ST  R0, flag       ; flag = 1, not allow printing 0's until first non-zero digit
 
-invalid .STRINGZ "Invalid input, please restart program and enter integer numbers."
+MAIN_OUTPUT   LD  R5, VANJ       ; R5 = 10000
+              JSR PRINT 
+              LD  R5, THOUSAND   ; R5 = 1000
+              JSR PRINT
+              LD  R5, HUNDRED    ; R5 = 100
+              JSR PRINT
+              LD  R5, TEN        ; R5 = 10
+              JSR PRINT          ; now, R6 should less than 10
+; In case number need to be printed is 0, JUMP to "LAST_ZERO" the print the 0
+              ADD R5, R6, #0     ; set R5 = R6, check if R6 == 0
+              BRz LAST_ZERO
+              AND R5, R5, #0     ; else print the last non-zero digit
+              ADD R5, R5, #1     ; R5 = 1
+              JSR PRINT
+              LD  R7, SAVE       ; RETURN
+              JMP R7            
+
+LAST_ZERO     LD  R0, De_ASCII   ; R0 = -48
+              NOT R0, R0 
+              ADD R0, R0, #1     ; R0 = 48 (zero)
+              OUT
+              LD R7, SAVE
+              JMP R7                
+
+PRINT         ST  R7, SAVE_2     ; again store R7 because there are JSRs
+              NOT R5, R5
+              ADD R5, R5, #1     ; R5 = -R5
+              AND R0, R0, #0
+PRINT_LOOP    ADD R0, R0, #1     ; R0 = Quotient count , this is the digit that we going to print
+              ST  R6, tmp        ; Save R6 to restore it later
+              ADD R6, R6, R5     ; R6 = R6 - R5
+              BRzp PRINT_LOOP    ; If R6 >= 0, continue subtracting
+
+              LD  R6, tmp        ; Restore last value of R6 before it results in negative
+              ADD R0, R0, #-1    ; Eliminate the last Remainder count that result in negative
+              BRnp CONTINUE      ; CONINTUE if R0 is non-zero
+
+              LD  R5, flag      
+              BRz CONTINUE       ; CONTINUE if flag == 0
+              RET                ; Not print out anything, continue the next digit
+
+CONTINUE      AND R5, R5, #0     ; R5 = 0
+              ST  R5, flag       ; flag = 0, allow printing 0's from now
+              LD  R5, De_ASCII   ; R5 = -48
+              NOT R5, R5
+              ADD R5, R5, #1     ; R5 = 48
+              ADD R0, R0, R5     ; print number in R0
+              OUT
+              LD  R7, SAVE_2     ; Return to "OUTPUT"
+              JMP R7              
 
 .END
