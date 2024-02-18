@@ -50,11 +50,8 @@ COUNT_CHUC       ADD R1, R1, #1      ; R1 += 1  counts "hang chuc"
 INPUT            ST  R7, SAVE       ; Store return address
 MAIN_INPUT       GETC      
                  OUT
-                 ST  R0, tmp        ; Temporary save R0, to check for Newline character
-                 JSR CHECK          ; JUMP TO CHECK subroutine to check for non-numberic chars   
-                 LD  R7, tmp        
-                 LD  R0, De_ASCII   ; chech if 47 < R0 < 58
-                 ADD R0, R7, R0     ; R0 = R7 - 48
+                 LD  R7, De_ASCII       
+                 ADD R0, R7, R0     ; R0 = R0 - 48
                  ST  R0, tmp        ; For convenient, store the De_ASCIIed number
                  BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
                  ADD R0, R0, #-9    ; R0 = (R7 - 48) - 9
