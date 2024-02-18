@@ -1,0 +1,167 @@
+;4. Input two integers from 0-9. Compute their sum, difference, product, and their quotient and remainder. Print them out on screen.
+
+.ORIG x3000
+prompt1     .STRINGZ "Please input a number: a = "
+prompt2     .STRINGZ "Please input a number: b = "
+                 LEA R0, prompt1
+                 PUTS
+                 AND R0, R0, #0
+                 ST  R0, var
+                 JSR INPUT
+                 LD  R0, tmp        ; load number (already De_ASCII)
+                 ADD R1, R0, #0     ; R1 = num1
+                 ST  R1, a
+
+                 LEA R0, prompt2
+                 PUTS
+                 LD  R0, var        ; var initally = 0
+                 ADD R0, R0, #1     ; var is the current "number" inputing, used for re-enter the number if previous is invalid (0 for 'a', 1 for 'b')
+                 ST  R0, var        ; var = 1 
+                 JSR INPUT
+                 LD  R0, tmp        ; load number (already De_ASCII)
+                 ADD R2, R0, #0     ; R2 = num2   
+                 ST  R2, b
+
+                 LEA R0, result_sum
+                 PUTS
+                 ADD R3, R1, R2
+                 JSR OUTPUT_R3
+
+                 LD  R1, a
+                 LD  R2, b
+                 LEA R0, result_del
+                 PUTS
+                 NOT R1, R1
+                 ADD R1, R1, #1
+                 ADD R3, R2, R1      ; R3 = R2 - R1
+                 JSR ABS_R3          ; R3 = |R3|
+                 JSR OUTPUT_R3               
+
+                 JSR R1_X_R2        ; Result store in R3
+                 LEA R0, result
+                 PUTS
+                 JSR OUTPUT_R3
+
+                 JSR R1_chia_R2        
+                 LEA R0, result_Q
+                 PUTS
+                 LD  R1 , QUOTI
+                 ADD R3, R1, #0      ; R3 = R1
+                 JSR OUTPUT_R3
+
+                 LEA R0, result_R
+                 PUTS
+                 LD  R2, REMAIN
+                 ADD R3, R2, #0      ; R3 = R1
+                 JSR OUTPUT_R3
+                 HALT
+
+R1_chia_R2  LD  R1, a
+            LD  R2, b            
+            ADD R2, R2, #0     ; Check if R2 == 0 ? Math error
+            BRz MATH_ERROR
+            AND R3, R3, #0     ; init R3 = 0
+            NOT R2, R2
+            ADD R2, R2, #1
+LOOP        ST  R1, tmp        ; Temporary save the previous value of R1 before it becomes Negative
+            ADD R3, R3, #1     ; R3 = number of substraction (QUOTIENT)
+            ADD R1, R1, R2     ; R1 = R1 - R2    
+            BRzp LOOP          ; if R1 >= 0, continue substracting
+            ADD R3, R3, #-1    ; Eliminate the quotient count of substraction that results in Negative
+            ST  R3, QUOTI     
+            LD  R1, tmp        ; Load value of R1 before it results in Negative. This is the REMAINDER
+            ST  R1, REMAIN     
+            RET
+
+MATH_ERROR  LEA R0, math_error
+            PUTS
+            HALT
+
+R1_X_R2          LD  R1, a
+                 LD  R2, b
+                 ADD R0, R2, #0     ; R0 = R2
+                 AND R2, R2, #0     ; R2 = 0
+X_LOOP           ADD R3, R2  #0     ; Store result in R3   ( R3 = R2)
+                 ADD R2, R2, R0     ; R2 = R2 + R0, until R1 = R1 - 1 = 0 
+                 ADD R1, R1, #-1 
+                 BRzp X_LOOP        ; if >=  continue adding
+                 ST  R3, ans        ; store final result
+                 RET
+
+ABS_R3           ST  R7, SAVE
+                 ADD R3, R3, #0
+                 BRzp EXIT
+                 NOT R3, R3
+                 ADD R3, R3, #1
+                 JSR EXIT
+             
+; Because the largest resulti is 9*9 = 81 < 100                
+OUTPUT_R3        ST  R7, SAVE
+                 LD  R2, De_ASCII    ; R2 = -48
+                 NOT R2, R2
+                 ADD R2, R2, #1      ; R2 = 48
+
+                 AND R1, R1, #0      ; inti R1 = 0 , couting second digit of result
+COUNT_CHUC       ADD R1, R1, #1      ; R1 += 1  counts "hang chuc"
+                 ADD R3, R3, #-10    ; R3 = R3 - 10
+                 BRzp COUNT_CHUC     ; if R3 still >= 10 then keep counting "hang chuc"
+                 ADD R3, R3, #10     ; Restore the remainder, R3 = hang don vi
+                 ADD R1, R1, #-1     ; Eliminate the last count that result in Negative, R1 = hang chuc
+                 BRz DON_VI          ; If "hang chuc" = 0 , only print first digit 
+                 ADD R0, R1, R2      ; R0 = R1 (ASCII form)
+                 OUT                 ; print out number
+DON_VI           ADD R0, R3, R2      ; similarly
+                 OUT 
+                 JSR EXIT
+
+INPUT            ST  R7, SAVE       ; Store return address
+MAIN_INPUT       GETC      
+                 OUT
+                 LD  R7, De_ASCII       
+                 ADD R0, R7, R0     ; R0 = R0 - 48
+                 ST  R0, tmp        ; For convenient, store the De_ASCIIed number
+                 BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
+                 ADD R0, R0, #-9    ; R0 = (R7 - 48) - 9
+                 BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
+                 LD  R0, TEN        ; print out newline for aesthetic reason
+                 OUT
+                 JSR EXIT     
+
+EXIT             LD  R7, SAVE
+                 JMP R7
+              
+ERROR            LD R0, TEN
+                 OUT
+                 LEA R0, error
+                 PUTS
+                 LD R0, var
+                 BRp print_b
+                 LEA R0, a_is
+                 PUTS
+                 JSR MAIN_INPUT
+print_b          LEA R0, b_is
+                 PUTS
+                 JSR MAIN_INPUT
+
+tmp         .BLKW x0001
+tmp2        .BLKW x0001
+SAVE        .BLKW x0001
+ans         .BLKW x0001
+TEN         .FILL x000A
+a           .BLKW x0001
+b           .BLKW x0001
+De_ASCII    .FILL #-48
+QUOTI       .BLKW x0001
+REMAIN      .BLKW x0001      
+var         .BLKW x0001
+math_error .STRINGZ "ERROR - Cannot divide by 0"
+result      .STRINGZ "\nThe product of a and b is: a*b = " 
+result_sum  .STRINGZ "\nThe sum of a,b is: a + b = "
+result_del  .STRINGZ "\nThe different of a,b is: "
+result_Q    .STRINGZ "\nThe Quotient  of a/b is: " 
+result_R    .STRINGZ "\nThe Remainder of a/b is: " 
+error       .STRINGZ "Invalid input, please enter a number (0 to 9): "  
+a_is        .STRINGZ "a = "
+b_is        .STRINGZ "b = "
+
+.END
