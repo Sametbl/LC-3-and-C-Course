@@ -16,7 +16,7 @@
                  LD  R0, tmp        ; load number (already De_ASCII)
                  ADD R2, R0, #0     ; R2 = num2    
 
-                 JSR R1_chia_R2        ; Result store in R3
+                 JSR R1_chia_R2        
                  LEA R0, result_Q
                  PUTS
                  LD  R2, De_ASCII   ; R2 = -48
