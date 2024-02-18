@@ -7,6 +7,9 @@
 
                  LEA R0, prompt2
                  PUTS
+                 LD  R0, var        ; var initally = 0
+                 ADD R0, R0, #1     ; var is the current "number" inputing, used for re-enter the number if previous is invalid (0 for 'a', 1 for 'b')
+                 ST  R0, var        ; var = 1 
                  JSR INPUT
                  LD  R0, tmp        ; load number (already De_ASCII)
                  ADD R2, R0, #0     ; R1 = num2    
@@ -71,6 +74,13 @@ ERROR            LD R0, TEN
                  OUT
                  LEA R0, error
                  PUTS
+                 LD R0, var
+                 BRp print_b
+                 LEA R0, a_is
+                 PUTS
+                 JSR MAIN_INPUT
+print_b          LEA R0, b_is
+                 PUTS
                  JSR MAIN_INPUT
 
 tmp         .BLKW x0001
@@ -83,5 +93,9 @@ prompt1     .STRINGZ "Please input a number: a = "
 prompt2     .STRINGZ "Please input a number: b = "
 result      .STRINGZ "The product of a and b is: a*b = " 
 error       .STRINGZ "Invalid input, please enter a number (0 to 9): "  
+a_is        .STRINGZ "a = "
+b_is        .STRINGZ "b = "
+var         .FILL x0000
+
 
 .END
