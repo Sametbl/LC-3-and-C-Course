@@ -1,74 +1,99 @@
 ; ================= Version 3.2 modification ===================
-; This sub-version will ask user to re_enter input if its invalid (non-numberic, OR ,out of range)
+; This sub-version will ask the user to re-enter input if it's invalid (non-numeric or out of range)
 
 ; ================ Important Notes ==================
-; We use GETC and OUT, instead of IN (trap_vector) to remove the <Input a character> messgae of IN trap vector. For aesthetic reason.
-; Registers involve: R0, R6 and R7 (RET)
-; Because there are some JSR instructions in this Subroutine, address stored R7 is modified, we have to save return Address to s label "SAVE".
+; Registers involved: R0, R1, R6, and R7 (RET)
 ; R6 is the Output integer
 
-INPUT       ST  R7, SAVE       ; Store return address
-MAIN_LOOP   GETC      
-            OUT
-            ST  R0, tmp        ; Temporary save R0, to check for Newline character
-            ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
-            BRz PRE_EXIT           ; If true, stop inputing and exit
 
-            LD  R7, tmp        ; R7 = inputed character
-            LD  R0, De_ASCII   ; chech if 47 < R0 < 58
-            ADD R0, R7, R0     ; R0 = R7 - 48
-            BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
-            ADD R0, R0, #-9    ; R0 = (R7 - 48) - 10
-            BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
-    
-            JSR X10_R6         ; R6 = R6 x10
+ 
+INPUT            ST  R7, SAVE       ; Store return address
+                 AND R6, R6, #0
+MAIN_LOOP        GETC      
+                 OUT
+                 ST  R0, tmp       ; tmporary save R0, to check for Newline character
+                 ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
+                 BRz EXIT           ; If true, stop inputing and exit
+                 JSR CHECK          ; JUMP TO CHECK subroutine to check for non-numberic chars
+                 JSR X10_R6         ; R6 = R6 x10              
+                 LD  R0, tmp        ; After CHECK, tmp already store the De_ASCIIed number
+                 ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
 
-            LD  R0, tmp        ; Load temporary saved input number(ASCII) to R0
-            ST  R6, tmp        ; Temporary save R6
-            LD  R6, De_ASCII   ; R6 = -48 
-            ADD R0, R0, R6     ; R0 = lastest digit  
-            LD  R6, tmp        ; Return R6
-            ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
-            JSR MAIN_LOOP      ; do INPUT loop
+; This part examine cases to check for Out of Range                 
+                 ADD R7, R6, #0     ; R7 = R6  (we don't need R7 to return anywhere)
+                 NOT R7, R7
+                 ADD R7, R7, #1
+                 LD  R0, four_dig   ; R0 = 6553 
+                 ADD R7, R0, R7     ; R7 = 6553 - R6     (R6 = R7)
+                 BRz LAST_DIGIT
+                 BRp MAIN_LOOP      ; if R6 < 3276, fith digit with no restriction
+WAIT_ENTER       GETC               ; else check for "enter"
+                 OUT                
+                 ST  R0, tmp        
+                 ADD R0, R0, #-10 
+                 BRz EXIT    
+                 JSR CHECK          ; any other character include number input is ERROR, or EXCEED if its a number
+                 JSR EXCEEDED       
 
-X10_R6      ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
-            ST  R0, tmp2
-            AND R6, R6, #0     ; R6 = 0   
-            LD  R0, TEN        ; R0 = 10
--------------------------------------- Multiplication loop -------------------------
-X_LOOP      ST  R0, tmp3
-            LD  R0, tmp2       ; tmp2 = a
-            ADD R6, R6, R0     ; R6 = R6 + a
-            LD  R0, tmp3       ; tmp3 initally = 10 
-            ADD R0, R0, #-1    ; tmp3--    
-            BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
-            RET                ; else Return
-  -------------------------------------------------------------------------------- incomplete          
-PRE_EXIT    ST  R6, tmp
-            LD  R0, MAX_LIM
-            NOT R6, R6
-            ADD R6, R6, #1
-            ADD R6, R0, R6     ; check if 65535 - R6 <0
-            BRzp EXIT          ; if zero or positive ( R6 <= 65535 ), EXIT
-            LEA R0, invalid
+LAST_DIGIT       GETC      
+                 OUT
+                 ST  R0, tmp        
+                 ADD R0, R0, #-10  
+                 BRz EXIT           
+                 JSR CHECK
+                 LD  R7, tmp                 
+                 ADD R7, R7, #-5    ; else last digit limit is 7
+                 BRp EXCEEDED       ; "EXCEED" error message and prompt user
+                 JSR X10_R6         ; R6 = R6 x10              
+                 LD  R0, tmp        ; Load number
+                 ADD R6, R6, R0     
+                 JSR WAIT_ENTER     ; WAIT for enter, or check for any other input (surely will lead to EXCEEDED or ERROR
+
+X10_R6           ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
+                 ST  R0, tmp2
+                 AND R6, R6, #0     ; R6 = 0   
+                 LD  R0, TEN       ; R0 = 10
+X_LOOP           ST  R0, tmp3       
+                 LD  R0, tmp2       ; tmp2 = a
+                 ADD R6, R6, R0     ; R6 = R6 + a
+                 LD  R0, tmp3       ; tmp3 initally = 10 
+                 ADD R0, R0, #-1    ; tmp3--    
+                 BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
+                 RET                ; else Return
+                 
+; CHECK Subroutine note: tmp initally store inputed character, tmp2 store return address
+CHECK            ST  R7, tmp2
+                 LD  R7, tmp        ; 
+                 LD  R0, De_ASCII   ; chech if 47 < R0 < 58
+                 ADD R0, R7, R0     ; R0 = R7 - 48
+                 ST  R0, tmp        ; For convenient, store the De_ASCIIed number
+                 BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
+                 ADD R0, R0, #-9    ; R0 = (R7 - 48) - 9
+                 BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
+                 LD  R7, tmp2
+                 JMP R7
+                 
+EXIT             LD  R7, SAVE
+                 JMP R7
+           
+ERROR       LEA R0, error
             PUTS
-            
-            
-EXIT        LD  R7, SAVE
-            JMP R7
-              
-ERROR       LD R0, TEN
-            OUT
-            LEA R0, error
-            PUTS
-            HALT
+            AND R6, R6, #0
+            JSR MAIN_LOOP
 
-invalid     .STRINGZ "\nThe input is Out of Range, please, Re-enter input (0 to 65535): "              
-error       .STRINGZ "Invalid input, program ended."       
-tmp         .BLKW x0001     ; acts as Virtual Register
+EXCEEDED    LEA R0, exceed
+            PUTS
+            AND R6, R6, #0
+            JSR MAIN_LOOP
+
+error       .STRINGZ "\nInvalid input, please enter again: "     
+exceed      .STRINGZ "\nInputted number is out of range, please try again: "
+tmp         .BLKW x0001     ; acts as a virtual register
 tmp2        .BLKW x0001     ; for x10 value of X10_LOOP
 tmp3        .BLKW x0001     ; for multiplication countdown
 SAVE        .BLKW x0001
-MAX_LIM     .FILL xFFFF
+four_dig    .FILL #6553
+MAX         .FILL xFFFF
 TEN         .FILL x000A
 De_ASCII    .FILL #-48
+
