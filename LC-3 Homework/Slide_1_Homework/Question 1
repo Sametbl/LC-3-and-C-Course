@@ -12,7 +12,7 @@
                  ST  R0, var        ; var = 1 
                  JSR INPUT
                  LD  R0, tmp        ; load number (already De_ASCII)
-                 ADD R2, R0, #0     ; R1 = num2    
+                 ADD R2, R0, #0     ; R2 = num2    
 
                  JSR R1_X_R2        ; Result store in R3
                  LEA R0, result
@@ -52,11 +52,6 @@ MAIN_INPUT       GETC
                  OUT
                  ST  R0, tmp        ; Temporary save R0, to check for Newline character
                  JSR CHECK          ; JUMP TO CHECK subroutine to check for non-numberic chars   
-                 LD  R0, TEN        ; print out newline for aesthetic reason
-                 OUT
-                 JSR EXIT              
-; CHECK Subroutine note: tmp initally store inputed character, tmp2 store return address
-CHECK            ST  R7, tmp2
                  LD  R7, tmp        
                  LD  R0, De_ASCII   ; chech if 47 < R0 < 58
                  ADD R0, R7, R0     ; R0 = R7 - 48
@@ -64,8 +59,9 @@ CHECK            ST  R7, tmp2
                  BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
                  ADD R0, R0, #-9    ; R0 = (R7 - 48) - 9
                  BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
-                 LD  R7, tmp2
-                 JMP R7
+                 LD  R0, TEN        ; print out newline for aesthetic reason
+                 OUT
+                 JSR EXIT    
                  
 EXIT             LD  R7, SAVE
                  JMP R7
