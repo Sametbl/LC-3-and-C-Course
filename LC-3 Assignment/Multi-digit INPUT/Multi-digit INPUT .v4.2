@@ -54,12 +54,9 @@ INITAL_JUMP      JSR CHECK          ; JUMP TO CHECK subroutine to check for non-
                  ADD R7, R6, #0     ; R7 = R6  (we don't need R7 to return anywhere)
                  NOT R7, R7
                  ADD R7, R7, #1
-                 ST  R7, tmp        ; tmp = -R6
                  LD  R0, four_dig   ; R0 = 3276  
                  ADD R7, R0, R7     ; R7 = 3276 - R6     (R6 = R7)
                  BRz LAST_DIGIT
-                 LD  R7, tmp
-                 ADD R7, R0, R7     ; again R7 = 3276 - R6
                  BRp MAIN_LOOP      ; if R6 < 3276, fith digit with no restriction
 WAIT_ENTER       GETC               ; else check for "enter"
                  OUT                
