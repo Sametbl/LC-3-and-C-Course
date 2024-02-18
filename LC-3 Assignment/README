@@ -45,18 +45,18 @@ b) Convention 2: Remainder is Negative
 =====> The Quotient in this method only 1 simple number in any cases, only the signed is afternated.
 =====>         Quotient  = -Quotient           if one of the Numerator OR Denominator < 0 
                Remainder = -Remainder          if either Numerator OR Denominator < 0
-=====>  NOICE
+=====> "Imma chose this one"
 
 - Note that the result of Quotient must match the "sign rule".
 - The "sign rule" : Same signs - the answer is Positive   ;    Different signs - the answer is Negative
-===> "Assessing the theory above, this is always true anyway, so no need to concern about this in the code."
+===> "Assessing the theory above, this is always true anyway, no need to concern about this in the code."
 
 
 
                                                   3. SIZE OF INTEGER
 - Registers in LC-3 have size of 16-bit, the maxinum signed number LC-3 can represents is -(2^15 - 1) to 2^15 ,OR, −32,768 to 32,767, so registers in LC-3 only capable of performing arithmetic operations in this range.
 - If the number is unsigned the range will be 0 to 65535.
-          "Everyone know this, why the fck am I explaining this"
+      
 
 
 
