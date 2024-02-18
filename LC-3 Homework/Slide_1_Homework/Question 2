@@ -42,9 +42,9 @@ LOOP        ST  R1, tmp        ; Temporary save the previous value of R1 before 
             ADD R1, R1, R2     ; R1 = R1 - R2    
             BRzp LOOP          ; if R1 >= 0, continue substracting
             ADD R3, R3, #-1    ; Eliminate the quotient count of substraction that results in Negative
-            ST  R3, QUOTI      ; Store in x5000
+            ST  R3, QUOTI     
             LD  R1, tmp        ; Load value of R1 before it results in Negative. This is the REMAINDER
-            ST  R1, REMAIN     ; Store in x5001   
+            ST  R1, REMAIN     
             RET
 
 MATH_ERROR  LEA R0, math_error
