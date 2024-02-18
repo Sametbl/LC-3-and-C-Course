@@ -14,7 +14,7 @@
 ; - Add non-numberic character as last digit and check
 ; =====>  Final check: does ERROR message indicate the correct type of error
 
----------------------- Le Code ---------------
+;---------------------- Le Code ---------------
 .ORIG x3000
 msg         .STRINGZ "Enter number (-32768 to 32767):  "
             LEA R0, msg
