@@ -35,7 +35,7 @@ a) Convention 1: Remainder is Positive
  => Numerator &  Denominator > 0        => Quotient & Remainder > 0     ,  Quotient  =   Quotient
  => Numerator OR Denominator < 0        => Quotient < 0,   Remainder > 0,  Quotient  = -[Quotient +1]
  => Numerator &  Denominator < 0        => Quotient > 0,   Remainder < 0,  Quotient  =   Quotient
- => Numberator < Denominator            => Quotient = 0, Remainder = Numberator
+ => |Numberator| < |Denominator|            => Quotient = 0, Remainder = Numberator
 ===> "Calculating Quotient will complicated as FUCK. Imagine the amount of if-esle statement required for this shitty ass Convention"
 
 b) Convention 2: Remainder is Negative
@@ -48,7 +48,7 @@ b) Convention 2: Remainder is Negative
  => Numerator &  Denominator > 0        => Quotient & Remainder > 0 
  => Numerator OR Denominator < 0        => Quotient & Remainder < 0
  => Numerator &  Denominator < 0        => Quotient > 0,   Remainder < 0
- => Numberator < Denominator            => Quotient = 0, Remainder = Numberator
+ => |Numberator| < |Denominator|            => Quotient = 0, Remainder = Numberator
 =====> The Quotient in this method only 1 simple number in any cases, only the signed is afternated.
 =====>         Quotient  = -Quotient           if one of the Numerator OR Denominator < 0 
                Remainder = -Remainder          if either Numerator OR Denominator < 0
