@@ -382,7 +382,7 @@ VANJ      .FILL #10000
 
 
 
-;-------------- ENDING CHECK (cuz I laik) ------------------
+;-------------- ENDING CHECK  ------------------
 ENDING       ST  R7, temp       ; Not SAVE_2 or SAVE_3, becaue OUTPUT subroutine uses them
              LEA R0, SENT1
              PUTS
