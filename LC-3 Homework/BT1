@@ -1,6 +1,6 @@
 ; Name: LUONG THANH VY (2151280), finished in 22/01/2024
 
-; Task: Input 3 numbers to R0, R1 and R3. Find the Max and Min numbers then store (LOAD) them into R3, R4
+; Task: Input 3 numbers to R0, R1 and R2. Find the Max and Min numbers then store them into R3, R4
 
 ; The Algorithm:
 ; - Assume the first int is MAX, then compare this max value to other integers. If larger, the MAX value equal the larger integer. Similarly, we're comparing for smaller value to find MIN
