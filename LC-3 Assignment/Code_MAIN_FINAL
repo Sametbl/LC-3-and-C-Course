@@ -8,7 +8,7 @@
 ; --------------------- Le Code ------------------
 
 .ORIG x3000
-instruction .STRINGZ "Note 1: The acceptable integer range: -32768 to 32767\nNote 2: Non-numberic character entered will Halt the program\nNote 3: '-' only enter once to indicate negative number\n"
+instruction .STRINGZ "Note 1: The acceptable integer range: -32768 to 32767\nNote 2: Non-numberic character entered is invalid\nNote 3: '-' only enter once to indicate negative number\n"
                     LEA R0, instruction
                     PUTS
 plz1     .STRINGZ ">> Plz input an integer to x4000: a = "           
