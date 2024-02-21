@@ -1,6 +1,9 @@
 ; ============== Version-2 modification ==============
 ; We tried to optimized the Subroutine to uses the least Registers as possible.
-; The last version used up to 5 Registers, this version only require only 3.
+; The last version used up to 5 Registers, this make using this Subroutine required save values that already stored in these
+ ;Resgister if you want to keep them, which required several steps to probably use this Sub
+; This version only require only 3, which means you don't need to care if this Subroutine affect the currently stored values in
+;some Registers, the Subroutine also initialize the Registers it going to use.
 
 ; ============== Important Note ===============
 ; We use GETC and OUT, instead of IN (trap_vector) to remove the <Input a character> messgae of IN trap vector. For aesthetic reason.
