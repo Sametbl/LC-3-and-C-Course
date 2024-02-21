@@ -9,6 +9,7 @@
 ; R6 is the Output integer
 
 INPUT       ST  R7, SAVE       ; Store return address
+            AND R6, R6, #0
 MAIN_LOOP   GETC      
             OUT
             ST  R0, tmp        ; Temporary save R0, to check for Newline character
