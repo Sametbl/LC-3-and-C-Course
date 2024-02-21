@@ -3,7 +3,9 @@
 ; JSR instruction is uses in this Subroutine, save the return Address to "SAVE" label.
 ; R6 is Output integer
 
-INPUT       GETC      
+INPUT       ST  R7, SAVE
+            AND R6, R6, #0  
+MAIN_INPUT  GETC      
             OUT
             ST R0, tmp         ; Temporary save R0
             ADD R0, R0, #-10   ; Check for newline character (Enter)
@@ -13,7 +15,7 @@ INPUT       GETC
             LD R5, De_ASCII    ; R5 = -48
             ADD R0, R0, R5     ; R0 = lastest digit       
             ADD R6, R6, R0     ; Each loop: R6 = (R6 x10) +  R0
-            JSR INPUT        
+            JSR MAIN_INPUT        
 
 X10_R6      ADD R5, R6 ,#0     ; R5 = initial value of R6 = a
             AND R6, R6, #0     ; R6 = 0
@@ -25,7 +27,6 @@ XLOOP       ADD R6, R6, R5     ; R6 = R6 + a
             
 EXIT        LD  R7, SAVE 
             RET
-
 De_ASCII    .FILL #-48
 TEN         .FILL x000A
 tmp         .BLKW x0001
