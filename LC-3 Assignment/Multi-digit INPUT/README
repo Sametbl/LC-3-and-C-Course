@@ -1,4 +1,18 @@
+  These are my custom Subroutine "module", which you can treat it as a library like other High Level Programming.
+To use just copy and paste thw whole thing at the end of your LC-3 code, and "JSR" to the Subroutine, the result
+is always stored in R6. Then store this R6 to LABEL or any Register you desired.
+
+  The Subroutine only used R0, R6, R7 (except .v1), which means that if the current values in other Registers is
+untouched after called "JSR INPUT". If you storing anything in R6, make sure to save it before using this Subroutine
+(values in R0, R7 is also affected, but usually who the fuck store important values in these Registers)
+
+
 MODIFICATION NOTES
+Note:
+For number 32768 to 65535, The HEX representation in LC-3 is also the same as Negative number from -32768 to -1
+The factors that affect how LC-3 determine whether a number is signed or unsigned, is not yet known for me.
+But if we want to display number from 32768 to 65535, make sure to use the correct OUTPUT Subroutine that can only 
+output unsigned number (Subroutine that does not have ALU operations that has R6 results in Negative)
 
 =========== Version 1 ===========
 - Multiple digit input ( 0 to 65536 )
