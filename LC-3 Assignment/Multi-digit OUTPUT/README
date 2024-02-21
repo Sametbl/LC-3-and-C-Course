@@ -11,6 +11,7 @@ To use these Subroutine "module", store the number you need to display in R6 the
 - Print out number stored in R6
 - Registers used: R0, R6, R5, R7(RET)
 - Always extend to 5 digits.    ( Ex:  34 = 00034) 
+- If R6 <0 , displays '0'       (based on what I've tested)
 
 =================== Version 2 ================
 - Print out unsigned integer ( 0 to 65535 )
