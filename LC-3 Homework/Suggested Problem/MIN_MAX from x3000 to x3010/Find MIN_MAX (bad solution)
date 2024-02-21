@@ -1,0 +1,354 @@
+; Problem: Load number from x3001 to x3010 and find MIN, MAX.
+
+
+; THIS IS BAD SOLUTION:
+; Normally you compare a number by subtration, but in comparsion involve negative number, this could cause problem in LC-3
+; Subtraction a Positive num by Negative num, could resultin number that excced the limit if 16-bit number (32767 or 65535).
+;The comparison could be false. 
+
+; My approach this ISSUE is to separate Negative and Positive numbers to 2 groups (which I will call it "NEGA" and "PUSS") 
+; Then find MIN, MAX is of each group, for negative number, calculate the absolute values and compare MIN, MAX like positive numbers.
+;Invert MAX to MIN, and MIN to MAX, for NEGA group.
+
+; MAX = MAX of "PUSS" group
+; MIN = Min of "NEGA" group
+; if Max of "PUSS" = NULL, MAX = Min of "NEGA"
+; if Min of "NEGA" = NULL, MIN = Min of "PUSS"
+; In case, there are only Negative or Positive number, we neeed 2 flag to determine:
+; - flag_1 = True: have Negative numbers in the list             (assigned in NEGA group) 
+; - flag_2 = True: have Positive numbers in the list             (assigned in PUSS group)
+
+
+.ORIG x3000
+num_x3000 .BLKW x0001       ; This is for spacing for num1 to be in x3001
+num1     .BLKW x0001
+num2     .BLKW x0001
+num3     .BLKW x0001
+num4     .BLKW x0001
+num5     .BLKW x0001
+num6     .BLKW x0001
+num7     .BLKW x0001
+num8     .BLKW x0001
+num9     .BLKW x0001
+num10    .BLKW x0001
+num11    .BLKW x0001
+num12    .BLKW x0001
+num13    .BLKW x0001
+num14    .BLKW x0001
+num15    .BLKW x0001
+
+               LD  R1, start_ID   ; Load starting address
+               LD  R2, end_ID     ; Load ending address
+               NOT R1, R1
+               ADD R1, R1, #1     ; R1 = -R1
+               ADD R2, R2, R1     ; R2 = end - start = x3010 - x3001 = #15 , for input countdown, There are actually 16 , 0 included
+               ST  R2, length     ; R2 tells the length of array of number that we going to work with
+               LD  R1, start_ID   ; restore R1 to x3001
+               AND R4, R4, #0     
+               ST  R4, Num_of_Neg ; Conviently, init Num_of_Neg and Num_of_Pos while we have R4 = 0
+               ST  R4, Num_of_Pos
+               ST  R4, flag_1
+               ST  R4, flag_2
+               ADD R4, R4, #-8    ; Init start R4 words jump-counter
+
+NHAP           LEA R0, msg        ; 
+               PUTS
+               LEA R0, X_3001
+               ADD R4, R4, #8     ; Increase jump-size
+               ADD R0, R0, R4     ; ADD to R0 to output the right message
+               STI R0, var
+               PUTS
+               JSR INPUT
+               STR R6, R1, #0     ; Store inputed value to corresponding address  
+               ADD R1, R1, #1     ; Increment R1 for inputing next address
+               ADD R2, R2, #-1    ; Tracking when to stop inputing
+               BRzp NHAP
+
+               LDI R1, start_ID   ; Load value stored in x3001 (start)
+               ST  R1, Min1
+               ST  R1, Max1       ; Assuming R1 is MIN and MAX
+               ST  R1, Min2
+               ST  R2, Max2
+               LD  R1, start_ID   ; R1 = x3001    ( = address, != value) 
+               LD  R2, length 
+
+
+ COMPARE       LDR R3, R1, #0
+               BRn  NEGA
+               BRzp PUSS
+ NEXT          ADD R1, R1, #1
+               ADD R2, R2, #-1    
+               BRzp COMPARE       ; if count >= 0, countinue inputing
+
+               LD  R4, Min1
+               LD  R5, Max1
+               NOT R4, R4
+               ADD R4, R4, #1
+               NOT R5, R5
+               ADD R5, R5, #1
+               ST  R4, Max1           ; invert the Max, Min of NEGA group and exchange Max to Min and vv
+               ST  R5, Min1
+
+               LD  R0, flag_1
+               ADD R0, R0, #-1
+               BRz Assign_NEGA
+               LD  R0, flag_2
+               ADD R0, R0, #-1
+               BRz Assign_PUSS
+
+               LD  R0, flag_1
+               BRz ONLY_PUSS
+               LD  R0, flag_2
+               BRz ONLY_NEGA
+
+               LD  R2, To_ASCII
+               LEA R0, msg_MIN
+               PUTS 
+               LD  R0, MIN
+               ADD R0, R0, R2
+               OUT
+
+               LEA R0, msg_MAX
+               PUTS
+               LD  R0, MAX
+               ADD R0, R0, R2
+               OUT
+               HALT
+
+ONLY_PUSS      LD  R4, Min2
+               ST  R4, MIN
+ONLY_NEGA      LD  R4, Max1
+               ST  R4, MAX
+              
+Assign_NEGA    LD  R4, Min1
+               ST  R4, MIN
+
+Assign_PUSS    LD  R4, Max2
+               ST  R4, MAX
+
+NEGA           AND R0, R0, #0
+               ADD R0, R0, #1
+               ST  R0, flag_1
+               LD  R4, Min1
+               LD  R5, Max1
+               NOT R3, R3
+               ADD R3, R3, #1
+               JSR MIN_MAX
+
+PUSS           AND R0, R0, #0
+               ADD R0, R0, #1
+               ST  R0, flag_2
+               LD  R4, Min2
+               LD  R5, Max2
+               JSR MIN_MAX
+
+
+
+; R3 = Number needed to be compare
+; R4 = Min,  R5 = MAX
+; Since Min, Max is different in 2 groups, store them these registers before JSR to "MIN_MAX"
+MIN_MAX         ST  R3, tmp_R3
+                JSR COMPARE_MIN     ; R3 is untouched in this SUB
+                JSR COMPARE_MAX
+                JSR NEXT
+                
+
+COMPARE_MIN     ST  R4, temp         ; Temporary save R4
+                NOT R4, R4
+                ADD R4, R4, #1
+                ADD R4, R3, R4      ; R4 = R3 - R4 = R3 - Min
+                BRn New_Min         ; If Min > R3, R3 = new Min
+                LD  R4, temp         ; If Min <= R3, EXIT keep Min as it was
+                RET
+New_Min         ADD R4, R3, #0      ; R4 = Min = R3
+                RET
+
+COMPARE_MAX     ST  R5, temp         ; Temporary save R4
+                NOT R3, R3
+                ADD R3, R3, #1
+                ADD R5, R5, R3      ; R5 = R5 - R3 = Max - R3
+                BRn New_Max         ; If R3 > Max, R3 = new Max
+                LD  R5, temp         ; If R3 <= Max, EXIT keep Max as it was
+                RET
+New_Max         ADD R5, R3, #0      ; R5 = Max = R3
+                RET
+
+
+EXIT            LD  R7, SAVE
+                RET                 
+
+
+
+
+start_ID       .FILL x3001       
+end_ID         .FILL x3005        ; you can adjust the amount of numbers that we are working with
+var        .FILL x4000
+To_ASCII   .FILL #48
+SAVE       .BLKW x0001
+Max1       .BLKW x0001
+Max2       .BLKW x0001
+Min1       .BLKW x0001
+Min2       .BLKW x0001
+MAX        .BLKW x0001
+MIN        .BLKW x0001
+flag_1     .BLKW x0001
+flag_2     .BLKW x0001
+temp       .BLKW x0001
+tmp_R3     .BLKW x0001
+Num_of_Neg .BLKW x0001
+Num_of_Pos .BLKW x0001
+length     .BLKW x0001
+
+
+;-------------------- Message ---------------------------
+msg        .STRINGZ "Enter a signed number (-32768 to 32767) to "
+msg_MIN    .STRINGZ "\nMIN integers is: "
+msg_MAX    .STRINGZ "\nMAX integers is: "
+ X_3001       .STRINGZ  "x3001: "      ; each message is 8 words long 
+ X_3002       .STRINGZ  "x3002: "      ; meaning if you load next X_30.. messgae is will start +8 from the previous message
+ X_3003       .STRINGZ  "x3003: "      ; Which I will call "jump-size"
+ X_3004       .STRINGZ  "x3004: "
+ X_3005       .STRINGZ  "x3005: "
+ X_3006       .STRINGZ  "x3006: "
+ X_3007       .STRINGZ  "x3007: "
+ X_3008       .STRINGZ  "x3008: "
+ X_3009       .STRINGZ  "x3009: "
+ X_300A       .STRINGZ  "x300A: "
+ X_300B       .STRINGZ  "x300B: "
+ X_300C       .STRINGZ  "x300C: "
+ x_300D       .STRINGZ  "x300D: "
+ X_300E       .STRINGZ  "x300E: "
+ X_300F       .STRINGZ  "x300F: "
+ X_3010       .STRINGZ  "x3010: " 
+
+
+
+
+
+
+; ----------------------------------- INPUT Subroutine --------------------------------------
+;                               ( NOT AFFECTING TO MAIN CODE )
+
+
+INPUT            ST  R7, SAVE_2     ; Store return address
+INITIAL_LOOP     AND R6, R6, #0     ; make sure R6 = 0
+                 AND R0, R0, #0    
+                 ST  R0, flag       ; flag = 0: the input expected to be unsigned
+                 GETC
+                 OUT
+                 ST  R0, tmp        ; If R0 is a digit, save it and check it later
+                 ADD R0, R0, #-15   ; Because ADD instruction immediate field is between -16 and 15
+                 ADD R0, R0, #-15
+                 ADD R0, R0, #-15   ; Overall : R0 = R0 - 45  (check for '-' character)
+                 BRz IS_SIGNED
+                 JSR INITAL_JUMP    ; if not '-' character, continue inputing, but firstly, check whether the current character a number or non-number.
+
+IS_SIGNED        AND R0, R0, #0
+                 ADD R0, R0, #1
+                 ST  R0, flag       ; flag = 1: the current inputing number is signed
+                 JSR MAIN_LOOP
+
+MAIN_LOOP        GETC      
+                 OUT
+                 ST  R0, tmp        ; Temporary save R0, to check for Newline character
+                 ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
+                 BRz PRE_EXIT       ; If true, stop inputing and exit
+INITAL_JUMP      JSR CHECK          ; JUMP TO CHECK subroutine to check for non-numberic chars
+                 JSR X10_R6         ; R6 = R6 x10              
+                 LD  R0, tmp        ; After CHECK, tmp already store the De_ASCIIed number
+                 ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
+; This part examine cases to check for Out of Range                 
+                 ADD R7, R6, #0     ; R7 = R6  (we don't need R7 to return anywhere)
+                 NOT R7, R7
+                 ADD R7, R7, #1
+                 LD  R0, four_dig   ; R0 = 3276  
+                 ADD R7, R0, R7     ; R7 = 3276 - R6     (R6 = R7)
+                 BRz LAST_DIGIT
+                 BRp MAIN_LOOP      ; if R6 < 3276, fith digit with no restriction
+WAIT_ENTER       GETC               ; else check for "enter"
+                 OUT                
+                 ST  R0, tmp        
+                 ADD R0, R0, #-10 
+                 BRz PRE_EXIT
+                 JSR CHECK          ; any other character include number input is ERROR, or EXCEED if its a number
+                 JSR EXCEEDED       
+
+LAST_DIGIT       GETC      
+                 OUT
+                 ST  R0, tmp        
+                 ADD R0, R0, #-10  
+                 BRz PRE_EXIT       
+                 JSR CHECK
+                 LD  R7, flag
+                 ADD R7, R7, #-1    ; check for current number is signed
+                 BRz EXCEED_SIGNED  ; if true last digit limit is 8
+                 LD  R7, tmp        ;             
+                 ADD R7, R7, #-7    ; else last digit limit is 7
+                 BRp EXCEEDED       ; "EXCEED" error message and prompt user
+                 JSR ACCEPT         ; else accepts last digit
+
+EXCEED_SIGNED    LD  R7, tmp        ; R7 last digit (already De_ASCII)
+                 ADD R7, R7, #-8
+                 BRp EXCEEDED            
+ACCEPT           JSR X10_R6         ; R6 = R6 x10              
+                 LD  R0, tmp        ; Load number
+                 ADD R6, R6, R0     
+                 JSR WAIT_ENTER     ; WAIT for enter, or check for any other input (surely will lead to EXCEEDED or ERROR
+
+X10_R6           ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
+                 ST  R0, tmp2
+                 AND R6, R6, #0     ; R6 = 0   
+                 LD  R0, TEN        ; R0 = 10
+X_LOOP           ST  R0, tmp3       
+                 LD  R0, tmp2       ; tmp2 = a
+                 ADD R6, R6, R0     ; R6 = R6 + a
+                 LD  R0, tmp3       ; tmp3 initally = 10 
+                 ADD R0, R0, #-1    ; tmp3--    
+                 BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
+                 RET                ; else Return
+                 
+; CHECK Subroutine note: tmp initally store inputed character, tmp2 store return address
+CHECK            ST  R7, tmp2
+                 LD  R7, tmp        ; 
+                 LD  R0, De_ASCII   ; chech if 47 < R0 < 58
+                 ADD R0, R7, R0     ; R0 = R7 - 48
+                 ST  R0, tmp        ; For convenient, store the De_ASCIIed number
+                 BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
+                 ADD R0, R0, #-9    ; R0 = (R7 - 48) - 9
+                 BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
+                 LD  R7, tmp2
+                 JMP R7
+                 
+PRE_EXIT         LD  R0, flag
+                 ADD R0, R0, #-1    ;
+                 BRnp EXIT_2        ; if (flag -1) != 0, actually exiting
+                 NOT R6, R6
+                 ADD R6, R6, #1     ; if (flag -1) == 0, invert R6 before exit
+EXIT_2           LD  R7, SAVE_2
+                 JMP R7
+              
+ERROR            LEA R0, error
+                 PUTS
+                 LDI R0, var_2
+                 PUTS
+                 JSR INITIAL_LOOP
+
+EXCEEDED         LEA R0, exceed
+                 PUTS
+                 LDI R0, var_2
+                 PUTS
+                 PUTS
+                 JSR INITIAL_LOOP 
+         
+var_2       .FILL x4000       
+flag        .BLKW x0001
+tmp         .BLKW x0001
+tmp2        .BLKW x0001  
+tmp3        .BLKW x0001
+SAVE_2      .BLKW x0001
+TEN         .FILL x000A
+four_dig    .FILL #3276
+De_ASCII    .FILL #-48
+error       .STRINGZ "\nInvalid input, please re-enter number to "  
+exceed      .STRINGZ "\nInputed number is Out of Range, please re-enter number to "
+.END
