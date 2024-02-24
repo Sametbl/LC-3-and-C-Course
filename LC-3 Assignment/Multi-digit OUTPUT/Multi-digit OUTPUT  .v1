@@ -18,7 +18,8 @@ OUTPUT        ST  R7, SAVE
               JMP R7                 
               
 
-PRINT         AND R0, R0, #0     ; R0 = 0
+PRINT         ST  R7, SAVE_2
+              AND R0, R0, #0     ; R0 = 0
               NOT R5, R5
               ADD R5, R5, #1     ; R5 = -R5
 PRINT_LOOP    ADD R0, R0, #1     ; Remainder count
@@ -33,12 +34,14 @@ PRINT_LOOP    ADD R0, R0, #1     ; Remainder count
               ADD R5, R5, #1     ; R5 = 48
               ADD R0, R0, R5     
               OUT                ; PRINT OUT the digit
-              RET
+              LD  R7, SAVE_2
+              JMP R7
 
 
 
 tmp       .BLKW x0001
 SAVE      .BLKW x0001
+SAVE_2    .BLKW x0001
 De_ASCII  .FILL #-48
 TEN       .FILL #10
 HUNDRED   .FILL #100
