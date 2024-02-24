@@ -1,0 +1,5 @@
+Another way to output a multi-digit number to console in LC-3 is to convert it to BCD
+
+Problem: 
+- Write LC-3 program to convert a number to BCD and store the digits in UNITS, TEN, HUNDRED, THOUSAND, VANJ lables.
+- Use these labels to display the number on console. SEXT is allowed.
