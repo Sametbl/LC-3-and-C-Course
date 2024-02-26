@@ -34,18 +34,20 @@ a) Convention 1: Remainder is Positive
  => Numerator OR Denominator < 0        => Quotient < 0,   Remainder > 0,  Quotient  = -[Quotient +1]
  => Numerator &  Denominator < 0        => Quotient > 0,   Remainder < 0,  Quotient  =   Quotient
  => |Numberator| < |Denominator|            => Quotient = 0, Remainder = Numberator
-===> "Calculating Quotient will complicated. Imagine the amount of if-esle statement required for this Convention"
+===> "Calculating Quotient will complicated.
 
 b) Convention 2: Remainder is Negative
-                  Ex:  27 divide by -6   =>     27 = -6 * -4  -3
+                  Ex:  27 divide by -6   =>     27 = -6 * -4  +3
                   Ex: -27 divide by  6   =>    -27 =  6 * -4  -3
-                  Ex: -27 divide by -6   =>    -24 = -6 *  4  -3
+                  Ex: -27 divide by -6   =>    -27 = -6 *  4  -3
                   Ex:   6 divide by 27   =>      6 = 27 *  0 + 6
                   Ex:   6 divide by -27  =>      6 = -27*  0 + 6
                   Ex:  -6 divide by -27  =>     -6 = -27*  0 - 6
  => Numerator &  Denominator > 0        => Quotient & Remainder > 0 
- => Numerator OR Denominator < 0        => Quotient & Remainder < 0
+ => Numerator OR Denominator < 0        => Quotient < 0 ,  Reaminder =   Remainder
+                                                           Reaminder = - Remainder     ,if Numerator < 0
  => Numerator &  Denominator < 0        => Quotient > 0,   Remainder < 0
+
  => |Numberator| < |Denominator|            => Quotient = 0, Remainder = Numberator
 =====> The Quotient in this method only 1 simple number in any cases, only the signed is afternated.
 =====>         Quotient  = -Quotient           if one of the Numerator OR Denominator < 0 
