@@ -1,5 +1,4 @@
->>>>>>>>>>>>>>>>>>>   Group 3's Assignment attemp by Idiot <<<<<<<<<<<<<<<<<<<<<<<
-11/02/2024: " This Assignment has made me sucked my own d*ck during Tet. I nutted because it was so Hard."
+>>>>>>>>>>>>>>>>>>>   Group 3's Assignment attemp <<<<<<<<<<<<<<<<<<<<<<<
 
 ====================== The Problem ================
 "The LC-3 has no Divide instruction. A programmer needing to divide two numbers would have to write a routine to handle it.
@@ -11,15 +10,14 @@ Write an LC-3 machine language program starting at locaiton x3000 that divides t
                                         1. ALGORITHM FOR DIVISION IN LC-3
 --------- SOLUTION A ----------
 - Imagine Division is a loop of substraction and the number of times loop repeated before the subtration result in Negative is the Quotient, the remaining number after the last loop (smaller than divisor) is the Remainder.
-     "This is not a real definition, I made up this Shit . But atleast it works so don't touch it"
+    
 
 - ISSUE with this solution: 
-When perfoms divsion with 0, the output is 0 for 0/0, and non-zero number /0 will stucked in infinite loop, which is FUCKING BULLSHIT. 
+When perfoms divsion with 0, the output is 0 for 0/0, and non-zero number /0 will stucked in infinite loop, 
 "This can easily fixed by additional code. But this proved that this decomposition of division is NOT entirely CORRECT and my brain is full of shit"
 
 => Expecting a solution B 
 --------- SOLUTION B ----------
-... "No idea, my brain is fricking fried"
 
 
 
@@ -36,7 +34,7 @@ a) Convention 1: Remainder is Positive
  => Numerator OR Denominator < 0        => Quotient < 0,   Remainder > 0,  Quotient  = -[Quotient +1]
  => Numerator &  Denominator < 0        => Quotient > 0,   Remainder < 0,  Quotient  =   Quotient
  => |Numberator| < |Denominator|            => Quotient = 0, Remainder = Numberator
-===> "Calculating Quotient will complicated as FUCK. Imagine the amount of if-esle statement required for this shitty ass Convention"
+===> "Calculating Quotient will complicated. Imagine the amount of if-esle statement required for this Convention"
 
 b) Convention 2: Remainder is Negative
                   Ex:  27 divide by -6   =>     27 = -6 * -4  -3
@@ -68,8 +66,6 @@ b) Convention 2: Remainder is Negative
 
 
 ===================================== OPTIONAL, NOT REQUIRED IN THE PROBLEM ====================================
-   "FUCK THIS. My DEADASS brain has spent more time in this "UNNECESSARY" tasks than the Actual fucking Problem."
-   "I losing weight due to lost of Braincells during Tet"
 
 4. Inputing multiple-digit number
 - Inputing process is done by looped subroutine that breaks when the inputed character is newline character (ASCII-10) or non-integer character.
