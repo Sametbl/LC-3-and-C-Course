@@ -120,14 +120,17 @@ LOOP        ST  R1, tmp        ; Temporary save the previous value of R1 before 
             LD  R1, flag    
             ADD R1, R1, #-1    ; check if flag == 1
             BRnp NEXT_CHECK    ; if (R1 - 1) != 0, skip inverting
-            LDI  R3, REMAIN     ; Invert Remainder
-            NOT R3, R3
-            ADD R3, R3, #1    
-            STI R3, REMAIN     ; Store the inverted Remainder
             LDI R3, QUOTI      ; Invert Quotient
             NOT R3, R3
             ADD R3, R3, #1
             STI R3, QUOTI      ; Store the inverted Quotient
+            LDI R3, num1
+            BRzp NEXT_CHECK
+            LDI  R3, REMAIN    ; Invert Remainder
+            NOT R3, R3
+            ADD R3, R3, #1    
+            STI R3, REMAIN     ; Store the inverted Remainder
+
             JSR EXIT
 
 NEXT_CHECK  ADD R1, R1, #-1     ; check if (flag -1) == 1   or flag == 2 
@@ -430,6 +433,6 @@ SENT2   .STRINGZ " = "
 SENT3   .STRINGZ " * "
 SENT4   .STRINGZ "  + "
 SENT5   .STRINGZ "\n(Numerator) = (Denominator) * (Quotient)  + (Remainder)\n"
-SENT6   .STRINGZ "\n## Code by: Luong Thanh Vy - a Mental Disorder, retard motherfucker. ##\n"
+SENT6   .STRINGZ "\n## Code by: Group 3 ##\n"
 
 .END
