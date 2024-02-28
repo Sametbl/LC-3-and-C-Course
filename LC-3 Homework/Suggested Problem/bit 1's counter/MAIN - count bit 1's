@@ -1,0 +1,160 @@
+; there are maxinum 16 bits to representa number, since restarting the program will not refresh the value in addresses
+; We need to manually refresh the address x4000 to x4010 
+
+
+.ORIG x3000
+inp       .STRINGZ "Please input a positive number: "
+bin       .STRINGZ "The Binary representation of the inputed number: "
+result    .STRINGZ "\n\nThe number of bit 1's of the inputed number: "
+              LEA R0, inp
+              PUTS 
+              JSR INPUT
+              ST  R6, num
+
+              LEA R0, bin
+              PUTS
+              LD  R6, num
+              JSR DEC_2_BIN
+              JSR PRINT_BIN
+
+              LEA R0, result
+              PUTS
+              LD  R6, bit_ones
+              JSR temp_OUT
+              HALT
+
+
+temp_OUT      ST  R7, SAVE
+              ADD R5, R6, #-10
+              BRn Below_10
+              LD  R0, To_ASCII
+              ADD R0, R0, #1
+              OUT 
+Below_10      LD  R0, To_ASCII
+              ADD R0, R6, R0
+              OUT
+              JSR EXIT
+              
+              
+
+
+
+DEC_2_BIN     ST  R7, SAVE
+;------------------------- Initialize the address x4000 to x4010
+              AND R6, R6, #0
+              ST  R6, bit_ones
+              ADD R6, R6, #15      ; R6 = 15, for 15 bits
+              LD  R5, LSB          ; R5 = x4000
+Refresh       AND R0, R0, #0       ; R0 = 0
+              STR R0, R5, #0       ; x40.. = 0
+              ADD R5, R5, #1       
+              ADD R6, R6, #-1
+              BRzp Refresh
+;------------------------- Convert Dec to Bin, stores in x4000+ AND count number of 1's bit
+              LD  R5, LSB          ; R5 = x4000, for storing bits
+              LD  R6, num          ; R6 = number that need to convert
+Convert       JSR R6_chia_2
+              LEA R7, #2
+              LD  R0, temp
+              BRnp COUNT           ; temp shouble has 2 values : 1 and 0.  So if temp (Remainder) != 0 then count += 1
+              LD  R0, temp
+              STR R0, R5, #0
+              ADD R5, R5, #1       ; Next Address for next bit of the Binary representation (right to left)
+              ADD R6, R6, #0       ; To apply branch condition
+              BRnz EXIT            ; if R6 = 0, stop
+              JSR Convert
+
+COUNT         LD  R0, bit_ones
+              ADD R0, R0, #1
+              ST  R0, bit_ones
+              RET
+
+PRINT_BIN     ST  R7, SAVE
+              LD  R5, LSB
+              ADD R5, R5, #15
+
+Print_loop    LDR R0, R5, #0       ; Load the MSB to R0
+              LD  R6, To_ASCII     
+              ADD R0, R0, R6       ; Convert to R0 to ASCII
+              OUT                  ; Print out
+              ADD R5, R5, #-1      ; Next binary bit (Left to right)
+              LD  R6, LSB
+              NOT R6, R6
+              ADD R6, R6, #1
+              ADD R6, R5, R6       ; R6 = R5 - x4000 < 0 ? EXIT
+              BRn EXIT 
+              JSR Print_loop
+              
+
+; R6 = Quotient, temp = Remainder
+R6_chia_2     AND R0, R0, #0          ; R0 = quotient counter
+              ADD R0, R0, #-1         ; R0 = -1, so that in the first loop R0 = 0
+Cycle         ST  R6, temp            ; Save value of R6 at start of every loop to get the Remainder when the loop end 
+              ADD R0, R0, #1             
+              ADD R6, R6, #-2
+              BRzp Cycle
+              ADD R6, R0, #0          ; R6 = Quotient ;   Summary, R6 =  int(R6 / 2)     (Ex: 55 / 2 = 27) 
+              RET                     ; temp = Remainder
+              
+
+EXIT        LD  R7, SAVE
+            JMP R7
+              
+num         .BLKW x0001
+temp        .BLKW x0001
+SAVE        .BLKW x0001
+bit_ones    .BLKW x0001
+LSB         .FILL x4000
+To_ASCII    .FILL #48
+
+;------------------------------------------------------------------------------------------------------
+INPUT       ST  R7, SAVE       ; Store return address
+MAIN_LOOP   GETC      
+            OUT
+            ST  R0, tmp        ; Temporary save R0, to check for Newline character
+            ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
+            BRz EXIT           ; If true, stop inputing and exit
+
+            LD  R7, tmp        ; R7 = inputed character
+            LD  R0, De_ASCII   ; chech if 47 < R0 < 58
+            ADD R0, R7, R0     ; R0 = R7 - 48
+            BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
+            ADD R0, R0, #-9    ; R0 = (R7 - 48) - 10
+            BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
+    
+            JSR X10_R6         ; R6 = R6 x10
+
+            LD  R0, tmp        ; Load temporary saved input number(ASCII) to R0
+            ST  R6, tmp        ; Temporary save R6
+            LD  R6, De_ASCII   ; R6 = -48 
+            ADD R0, R0, R6     ; R0 = lastest digit  
+            LD  R6, tmp        ; Return R6
+            ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
+            JSR MAIN_LOOP      ; do INPUT loop
+
+X10_R6      ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
+            ST  R0, tmp2
+            AND R6, R6, #0     ; R6 = 0   
+            LD  R0, TEN        ; R0 = 10
+X_LOOP      ST  R0, tmp3
+            LD  R0, tmp2       ; tmp2 = a
+            ADD R6, R6, R0     ; R6 = R6 + a
+            LD  R0, tmp3       ; tmp3 initally = 10 
+            ADD R0, R0, #-1    ; tmp3--    
+            BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
+            RET                ; else Return
+
+ERROR       LD R0, TEN
+            OUT
+            LEA R0, error
+            PUTS
+            HALT
+              
+error       .STRINGZ "Invalid input, program ended."              
+tmp         .BLKW x0001
+tmp2        .BLKW x0001  
+tmp3        .BLKW x0001
+TEN         .FILL x000A
+De_ASCII    .FILL #-48
+
+.END
