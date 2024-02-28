@@ -1,0 +1,17 @@
+2023's mid-term question
+Problem: For 15 integers stored in addresses from x3000 to x300F, enter an integer X to address x3010. 
+Find the smallest integer that is less than larger than X and largest integer that is smaller than X.
+
+
+Idea :
+- Comparing 15 integers to X, then seperate them into 2 groups : [smaller than X] and [larger than X]
+- Find the Min of [larger than X] group     => B
+- Find the Max of [smaller than X] group    => A
+
+- Breakdown:
++ Create an input subroutine
++ Create a Subroutine to find Min, Max that include Negative numbers   (Hardest part)
++ Create a loop seperating 2 groups
++ Find Min and Max of the 2 groups
+
+
