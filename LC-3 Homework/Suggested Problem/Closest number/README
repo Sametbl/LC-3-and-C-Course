@@ -1,6 +1,6 @@
 2023's mid-term question
 Problem: For 15 integers stored in addresses from x3000 to x300F, enter an integer X to address x3010. 
-Find the smallest integer that is less than larger than X and largest integer that is smaller than X.
+Find the smallest integer that is less than X and integer that is larger than X.
 
 Instruction unclear: if the integer is equal to X, would it be A or B ?
 => In my solution integer that equal to X will be skipped
