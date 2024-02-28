@@ -1,1 +1,63 @@
+Problem: Input positive number and count the number of bit 1 in the binary representation of that number.
+
+1. Algorithm
+- When divide a binary number to 2, if the Remainder is 1 then it is guarantee the first bit (LSB) of that number is 1.
+This is because the LSB is what make the binary number odd, other bits are always even.
+
+=> For counting 1's bit, just create a loop that shift the number to right and check the remainder of division by 2 until there is no bit 1 left (number == 0)
+Ex:   11001011011 % 2 = 1        (count = 1)
+      01100101101 % 2 = 1        (count = 2)
+      00110010110 % 2 = 0        (count = 2)
+      00011001011 % 2 = 1        (count = 3)
+      00001100101 % 2 = 1        (count = 4)
+      00000110010 % 2 = 0        (count = 4)
+      00000011001 % 2 = 1        (count = 5)
+      00000001100 % 2 = 0        (count = 5)
+      00000000110 % 2 = 0        (count = 5)
+      00000000011 % 2 = 1        (count = 6)
+      00000000001 % 2 = 1        (count = 7)
+      
+      00000000000   , number == 0     => STOP, escape loop 
+Conclusion: there of 7 of bit 1's in  11001011011 
+
+
+
+2. For debugging and testing purpose, we need to print out, the inputed number in Binary to console
+- Even thought the data displayed on LC-3 is 16 bits in HEX, the number we're working with in the code is always decimal.
+- To find the Binary representation of Decimal number, we only need continuously dividing it by 2 and print out the Remainder until it reached zero.
+Ex:       111  /  2   = 55        R = 1
+          55   /  2   = 27        R = 1
+          27   /  2   = 13        R = 1
+          13   /  2   = 6         R = 1
+          6    /  2   = 3         R = 0
+          3    /  2   = 1         R = 1
+          1    /  2   = 0         R = 1
+=> Stop because the Quotient reached 0
+=> the Binary representation = 1101111
+
+An visible Issue with this method is that along the division cycle, we cannot print out the Remainder immediately, 
+but we have reversely printing out the Remainder from the last -> first division.
+=> This can easily be Solved by storing the Remainder in many block of memory, for exmaple, we can store the Remainder from x4000 to x4006
+then print out 1 and 0 from x4006 to x4000.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
