@@ -1,7 +1,3 @@
-; there are maxinum 16 bits to representa number, since restarting the program will not refresh the value in addresses
-; We need to manually refresh the address x4000 to x4010 
-
-
 .ORIG x3000
 inp       .STRINGZ "Please input a positive number: "
 bin       .STRINGZ "The Binary representation of the inputed number: "
@@ -23,7 +19,6 @@ result    .STRINGZ "\n\nThe number of bit 1's of the inputed number: "
               JSR temp_OUT
               HALT
 
-
 temp_OUT      ST  R7, SAVE
               ADD R5, R6, #-10
               BRn Below_10
@@ -35,13 +30,9 @@ Below_10      LD  R0, To_ASCII
               OUT
               JSR EXIT
               
-              
-
-
-
+;--- Initialize x4000 -> x4010. Convert Dec to Bin, stores in x4000+ AND count number of 1's bit  -----         
 DEC_2_BIN     ST  R7, SAVE
-;------------------------- Initialize the address x4000 to x4010
-              AND R6, R6, #0
+              AND R6, R6, #0       ; Initialize the address x4000 to x4010
               ST  R6, bit_ones
               ADD R6, R6, #15      ; R6 = 15, for 15 bits
               LD  R5, LSB          ; R5 = x4000
@@ -50,7 +41,7 @@ Refresh       AND R0, R0, #0       ; R0 = 0
               ADD R5, R5, #1       
               ADD R6, R6, #-1
               BRzp Refresh
-;------------------------- Convert Dec to Bin, stores in x4000+ AND count number of 1's bit
+
               LD  R5, LSB          ; R5 = x4000, for storing bits
               LD  R6, num          ; R6 = number that need to convert
 Convert       JSR R6_chia_2
@@ -72,7 +63,6 @@ COUNT         LD  R0, bit_ones
 PRINT_BIN     ST  R7, SAVE
               LD  R5, LSB
               ADD R5, R5, #15
-
 Print_loop    LDR R0, R5, #0       ; Load the MSB to R0
               LD  R6, To_ASCII     
               ADD R0, R0, R6       ; Convert to R0 to ASCII
@@ -96,7 +86,6 @@ Cycle         ST  R6, temp            ; Save value of R6 at start of every loop 
               ADD R6, R0, #0          ; R6 = Quotient ;   Summary, R6 =  int(R6 / 2)     (Ex: 55 / 2 = 27) 
               RET                     ; temp = Remainder
               
-
 EXIT        LD  R7, SAVE
             JMP R7
               
@@ -106,6 +95,32 @@ SAVE        .BLKW x0001
 bit_ones    .BLKW x0001
 LSB         .FILL x4000
 To_ASCII    .FILL #48
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ;------------------------------------------------------------------------------------------------------
 INPUT       ST  R7, SAVE       ; Store return address
