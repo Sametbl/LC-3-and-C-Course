@@ -1,0 +1,93 @@
+; ================= Version 4.3 modification ===================
+; This version the same as v4.2 but used different overflow checking method.
+
+
+
+; ================ Important Notes ==================
+; Registers involve: R0, R6 and R7 (RET)
+; R6 is the Output integer
+
+INPUT            ST  R7, SAVE       ; Store return address
+INITIAL_LOOP     AND R6, R6, #0     ; make sure R6 = 0
+                 AND R0, R0, #0    
+                 ST  R0, sign       ; sign = 0: the input expected to be unsigned
+                 GETC
+                 OUT
+                 ST  R0, tmp        ; If R0 is a digit, save it and check it later
+                 ADD R0, R0, #-15   ; Because ADD instruction immediate field is between -16 and 15
+                 ADD R0, R0, #-15
+                 ADD R0, R0, #-15   ; Overall : R0 = R0 - 45  (check for '-' character)
+                 BRz IS_SIGNED
+                 JSR INITAL_JUMP    ; if not '-' character, continue inputing, but firstly, check whether the current character a number or non-number.
+
+IS_SIGNED        AND R0, R0, #0
+                 ADD R0, R0, #1
+                 ST  R0, sign       ; sign = 1: the current inputing number is signed
+                 JSR MAIN_LOOP
+
+MAIN_LOOP        GETC      
+                 OUT
+                 ST  R0, tmp        ; Temporary save R0, to check for Newline character
+                 ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
+                 BRz PRE_EXIT       ; If true, stop inputing and exit
+INITAL_JUMP      JSR CHECK          ; JUMP TO CHECK subroutine to check for non-numberic chars
+                 JSR X10_R6         ; R6 = R6 x10              
+                 LD  R0, tmp        ; After CHECK, tmp already store the De_ASCIIed number
+                 ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
+                 BR  MAIN_LOOP
+                 
+X10_R6           ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
+                 ST  R0, tmp2
+                 AND R6, R6, #0     ; R6 = 0   
+                 LD  R0, TEN        ; R0 = 10
+X_LOOP           ST  R0, tmp3       
+                 LD  R0, tmp2       ; tmp2 = a
+                 ADD R6, R6, R0     ; R6 = R6 + a
+                 
+                 LD  R0, trick
+                 AND R0, R0, R6     ; R0 = 0: valid, R0 = 1: overflow detected
+                 BRn EXCEEDED
+                 
+                 LD  R0, tmp3       ; tmp3 initally = 10 
+                 ADD R0, R0, #-1    ; tmp3--    
+                 BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
+                 RET                ; else Return
+                 
+; CHECK Subroutine note: tmp initally store inputed character, tmp2 store return address
+CHECK            ST  R7, tmp2
+                 LD  R7, tmp        ; 
+                 LD  R0, De_ASCII   ; chech if 47 < R0 < 58
+                 ADD R0, R7, R0     ; R0 = R7 - 48
+                 ST  R0, tmp        ; For convenient, store the De_ASCIIed number
+                 BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
+                 ADD R0, R0, #-9    ; R0 = (R7 - 48) - 9
+                 BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
+                 LD  R7, tmp2
+                 JMP R7
+                 
+PRE_EXIT         LD  R0, sign
+                 ADD R0, R0, #-1    ;
+                 BRnp EXIT          ; if (sign -1) != 0, actually exiting
+                 NOT R6, R6
+                 ADD R6, R6, #1     ; if (sign -1) == 0, invert R6 before exit
+EXIT             LD  R7, SAVE
+                 JMP R7
+              
+ERROR            LEA R0, error
+                 PUTS
+                 JSR INITIAL_LOOP
+                 
+EXCEEDED         LEA R0, exceed
+                 PUTS
+                 JSR INITIAL_LOOP 
+         
+sign        .BLKW x0001
+tmp         .BLKW x0001
+tmp2        .BLKW x0001  
+tmp3        .BLKW x0001
+SAVE        .BLKW x0001
+TEN         .FILL x000A
+trick       .FILL #32768
+De_ASCII    .FILL #-48
+error       .STRINGZ "\nInvalid input, please enter again: "  
+exceed      .STRINGZ "\nInputed number is Out of Range, please enter again: "
