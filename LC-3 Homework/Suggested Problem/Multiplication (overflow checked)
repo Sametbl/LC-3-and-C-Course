@@ -23,6 +23,7 @@ in2          .STRINGZ "Input an integer: b = "
                  BRn ABS_R2
                  ST R2, num2
 
+                
                  JSR R1_X_R2
                  LEA R0, result
                  PUTS
@@ -36,8 +37,11 @@ RESULT           JSR OUTPUT
                  HALT
 
 
-R1_X_R2          AND R3, R3, #0         ; R3 = 0
-MULTIPLY         ADD R3, R3, R1         ; R3 = R3 + R1
+R1_X_R2          ST  R7, SAVE
+                 AND R3, R3, #0         ; R3 = 0
+MULTIPLY         ADD R2, R2, #-1
+                 BRn EXIT 
+                 ADD R3, R3, R1         ; R3 = R3 + R1
                  ST  R3, temp
                  LD  R0, idk
                  NOT R0, R0
@@ -47,11 +51,12 @@ MULTIPLY         ADD R3, R3, R1         ; R3 = R3 + R1
                  LD  R0, temp
                  ADD R3, R3, R0
                  BRnp ERROR_LIMIT
-                 LD  R3, temp
-                 ADD R2, R2, #-1
-                 BRp MULTIPLY        
-                 ST  R3, temp
-                 RET
+                 LD  R3, temp     
+                 BR  MULTIPLY
+
+EXIT             ST  R3, temp
+                 LD  R7, SAVE
+                 JMP R7
 
 ERROR_LIMIT      LEA R0, error_limit
                  PUTS
