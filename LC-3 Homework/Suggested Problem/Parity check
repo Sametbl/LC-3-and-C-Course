@@ -1,0 +1,320 @@
+; Task: Check if numbers from x3000 to x300F (15 integers) is an even integer or not, count the even number.
+; Idea:
+;- Positive even integer: keep substracting 2 until it reached 0, if the result is Negative then its an odd number
+;- Negative even integer: keep adding 2 until it reached 0, if the result is Positive then its an odd number.
+
+.ORIG x3000
+msg         .STRINGZ "Enter an integer to address "
+result_EVEN .STRINGZ "\nThe number of Even integer is: "
+result_ODD  .STRINGZ "\nThe number of Odd  integer is: "
+                  LD  R1, start_ID
+                  LD  R2, end_ID
+                  NOT R1, R1
+                  ADD R1, R1, #1  
+                  ADD R2, R2, R1        ; R2 = R2 - R1 = end - start = length of the list (max = 15)
+                  ST  R2, length
+                  LD  R1, start_ID
+
+                  AND R4, R4, #0
+                  ST  R4, NumEVEN
+                  ST  R4, NumODD
+                  ADD R4, R4, #-8 
+
+Assign            LEA R0, msg
+                  PUTS
+                  LEA R0, X_3000
+                  ADD R4, R4, #8
+                  ADD R0, R0, R4
+                  PUTS
+                  JSR INPUT
+                  STR R6, R1, #0
+                  ADD R1, R1, #1
+                  ADD R2 ,R2, #-1
+                  BRp Assign
+
+                  LD  R1, start_ID
+                  LD  R2, length
+
+CHECK_P           LDR R3, R1, #0
+                  BRz EVEN
+                  BRn NEGATIVE
+                  BRp POSITIVE
+NEXT              ADD R1, R1, #1
+                  ADD R2, R2, #-1
+                  BRzp CHECK_P
+
+                  LEA R0, result_EVEN 
+                  PUTS
+                  LD  R6, NumEVEN
+                  JSR OUTPUT
+
+                  LEA R0, result_ODD
+                  PUTS
+                  LD  R6, NumODD
+                  JSR OUTPUT 
+                  HALT
+
+
+
+
+NEGATIVE          ADD R3, R3, #2
+                  BRz EVEN
+                  BRp ODD
+                  BR  NEGATIVE
+
+POSITIVE          ADD R3, R3, #-2
+                  BRz EVEN
+                  BRn ODD
+                  BR  POSITIVE
+
+EVEN              LD  R3, NumEVEN
+                  ADD R3, R3, #1 
+                  ST  R3, NumEVEN
+                  BR  NEXT
+
+ODD               LD  R3, NumODD
+                  ADD R3, R3, #1
+                  ST  R3, NumODD
+                  BR  NEXT
+
+
+ 
+
+                 
+
+
+start_ID       .FILL x4000
+end_ID         .FILL x400F
+NumEVEN        .FILL x4000
+NumODD         .FILL x4001
+length         .BLKW x0001
+
+
+X_3000        .STRINGZ "x3000: "
+X_3001        .STRINGZ "x3001: "
+X_3002        .STRINGZ "x3002: "
+X_3003        .STRINGZ "x3003: "
+X_3004        .STRINGZ "x3004: "
+X_3005        .STRINGZ "x3005: "
+X_3006        .STRINGZ "x3006: "
+X_3007        .STRINGZ "x3007: "
+X_3008        .STRINGZ "x3008: "
+X_3009        .STRINGZ "x3009: "
+X_300A        .STRINGZ "x300A: "
+X_300B        .STRINGZ "x300B: "
+X_300C        .STRINGZ "x300C: "
+X_300D        .STRINGZ "x300D: "
+X_300F        .STRINGZ "x300F: "
+
+
+
+
+;--------------------INPUT
+INPUT            ST  R7, SAVE       ; Store return address
+INITIAL_LOOP     AND R6, R6, #0     ; make sure R6 = 0
+                 AND R0, R0, #0    
+                 ST  R0, flag       ; flag = 0: the input expected to be unsigned
+                 GETC
+                 OUT
+                 ST  R0, tmp        ; If R0 is a digit, save it and check it later
+                 ADD R0, R0, #-15   ; Because ADD instruction immediate field is between -16 and 15
+                 ADD R0, R0, #-15
+                 ADD R0, R0, #-15   ; Overall : R0 = R0 - 45  (check for '-' character)
+                 BRz IS_SIGNED
+                 JSR INITAL_JUMP    ; if not '-' character, continue inputing, but firstly, check whether the current character a number or non-number.
+
+IS_SIGNED        AND R0, R0, #0
+                 ADD R0, R0, #1
+                 ST  R0, flag       ; flag = 1: the current inputing number is signed
+                 JSR MAIN_LOOP
+
+MAIN_LOOP        GETC      
+                 OUT
+                 ST  R0, tmp        ; Temporary save R0, to check for Newline character
+                 ADD R0, R0, #-10   ; Check for newline character (ASCII 10)
+                 BRz PRE_EXIT       ; If true, stop inputing and exit
+INITAL_JUMP      JSR CHECK          ; JUMP TO CHECK subroutine to check for non-numberic chars
+                 JSR X10_R6         ; R6 = R6 x10              
+                 LD  R0, tmp        ; After CHECK, tmp already store the De_ASCIIed number
+                 ADD R6, R6, R0     ; After each INPUT loop: R6 = (R6 x10) +  R0
+; This part examine cases to check for Out of Range                 
+                 ADD R7, R6, #0     ; R7 = R6  (we don't need R7 to return anywhere)
+                 NOT R7, R7
+                 ADD R7, R7, #1
+                 LD  R0, four_dig   ; R0 = 3276  
+                 ADD R7, R0, R7     ; R7 = 3276 - R6     (R6 = R7)
+                 BRz LAST_DIGIT
+                 BRp MAIN_LOOP      ; if R6 < 3276, fith digit with no restriction
+WAIT_ENTER       GETC               ; else check for "enter"
+                 OUT                
+                 ST  R0, tmp        
+                 ADD R0, R0, #-10 
+                 BRz PRE_EXIT
+                 JSR CHECK          ; any other character include number input is ERROR, or EXCEED if its a number
+                 JSR EXCEEDED       
+
+LAST_DIGIT       GETC      
+                 OUT
+                 ST  R0, tmp        
+                 ADD R0, R0, #-10  
+                 BRz PRE_EXIT       
+                 JSR CHECK
+                 LD  R7, flag
+                 ADD R7, R7, #-1    ; check for current number is signed
+                 BRz EXCEED_SIGNED  ; if true last digit limit is 8
+                 LD  R7, tmp        ;             
+                 ADD R7, R7, #-7    ; else last digit limit is 7
+                 BRp EXCEEDED       ; "EXCEED" error message and prompt user
+                 JSR ACCEPT         ; else accepts last digit
+
+EXCEED_SIGNED    LD  R7, tmp        ; R7 last digit (already De_ASCII)
+                 ADD R7, R7, #-8
+                 BRp EXCEEDED            
+ACCEPT           JSR X10_R6         ; R6 = R6 x10              
+                 LD  R0, tmp        ; Load number
+                 ADD R6, R6, R0     
+                 JSR WAIT_ENTER     ; WAIT for enter, or check for any other input (surely will lead to EXCEEDED or ERROR
+
+X10_R6           ADD R0, R6, #0     ; R0 = R6 = a = tmp2 ,   a is initial value of R6
+                 ST  R0, tmp2
+                 AND R6, R6, #0     ; R6 = 0   
+                 LD  R0, TEN        ; R0 = 10
+X_LOOP           ST  R0, tmp3       
+                 LD  R0, tmp2       ; tmp2 = a
+                 ADD R6, R6, R0     ; R6 = R6 + a
+                 LD  R0, tmp3       ; tmp3 initally = 10 
+                 ADD R0, R0, #-1    ; tmp3--    
+                 BRp X_LOOP         ; While R4 > 0, keeping adding 'a' to R6
+                 RET                ; else Return
+                 
+; CHECK Subroutine note: tmp initally store inputed character, tmp2 store return address
+CHECK            ST  R7, tmp2
+                 LD  R7, tmp        ; 
+                 LD  R0, De_ASCII   ; chech if 47 < R0 < 58
+                 ADD R0, R7, R0     ; R0 = R7 - 48
+                 ST  R0, tmp        ; For convenient, store the De_ASCIIed number
+                 BRn ERROR          ; If R0 < 0, non-numberic character ( <48 )
+                 ADD R0, R0, #-9    ; R0 = (R7 - 48) - 9
+                 BRp ERROR          ; If R0 > 0, non-numberic character ( >57 )
+                 LD  R7, tmp2
+                 JMP R7
+                 
+PRE_EXIT         LD  R0, flag
+                 ADD R0, R0, #-1    ;
+                 BRnp EXIT          ; if (flag -1) != 0, actually exiting
+                 NOT R6, R6
+                 ADD R6, R6, #1     ; if (flag -1) == 0, invert R6 before exit
+EXIT             LD  R7, SAVE
+                 JMP R7
+              
+ERROR            LD R0, TEN
+                 OUT
+                 LEA R0, error
+                 PUTS
+                 JSR INITIAL_LOOP
+
+EXCEEDED         LD R0, TEN
+                 OUT
+                 LEA R0, exceed
+                 PUTS
+                 JSR INITIAL_LOOP 
+      
+
+; -------------------- OUTPUT
+OUTPUT        ST  R7, SAVE
+              AND R0, R0, #0     ; R0 = 0
+              ADD R0, R0, #1
+              ST  R0, flag       ; flag = 1, not allow printing 0's until first non-zero digit
+
+              ADD R6, R6, #0        ; R6 unchanged, this line is to apply the brnach condition
+              BRzp MAIN_OUTPUT       ; if R6 >= 0, just continue printing the damn number
+                
+              NOT R6, R6
+              ADD R6, R6, #1        ; When R6 < 0,  |R6| = -R6
+              LD  R0, De_ASCII      ; R0 = -48
+              ADD R0, R0, #3        ; R0 = -45
+              NOT R0, R0
+              ADD R0, R0, #1        ; R0 = 45 ('-' character)
+              OUT                   ; print out hyphen to indicate negative number and then |R6|
+
+MAIN_OUTPUT   LD  R5, VANJ       ; R5 = 10000
+              JSR PRINT 
+              LD  R5, THOUSAND   ; R5 = 1000
+              JSR PRINT
+              LD  R5, HUNDRED    ; R5 = 100
+              JSR PRINT
+              LD  R5, TEN        ; R5 = 10
+              JSR PRINT          ; now, R6 should less than 10
+
+              ADD R5, R6, #0     ; set R5 = R6, check if R6 == 0
+              BRz LAST_ZERO
+              AND R5, R5, #0     ; else print the last non-zero digit
+              ADD R5, R5, #1     ; R5 = 1
+              JSR PRINT
+              LD  R7, SAVE       ; RETURN
+              JMP R7                 
+              
+LAST_ZERO     LD  R0, De_ASCII   ; R0 = -48
+              NOT R0, R0 
+              ADD R0, R0, #1     ; R0 = 48 (zero)
+              OUT
+              LD R7, SAVE
+              JMP R7        
+              
+
+PRINT         ST  R7, SAVE_2
+              NOT R5, R5
+              ADD R5, R5, #1     ; R5 = -R5
+              AND R0, R0, #0
+PRINT_LOOP    ADD R0, R0, #1     ; Remainder count
+              ST  R6, tmp        ; Save R6 to restore it later
+              ADD R6, R6, R5     ; R6 = R6 - R5
+              BRzp PRINT_LOOP    ; If R6 >= 0, continue subtracting
+
+              LD  R6, tmp        ; Restore last value of R6 before it results in negative
+              ADD R0, R0, #-1    ; Eliminate the last Remainder count that result in negative
+              BRnp CONTINUE      ; CONINTUE if R0 is non-zero
+
+              LD  R5, flag       
+              ADD R5, R5, #0     ; Because Branch condition only apply for ALU operations
+              BRz CONTINUE       ; CONTINUE if flag == 0
+              RET                ; Not print out anything, continue the next digit
+
+CONTINUE      AND R5, R5, #0
+              ST  R5, flag       ; flag = 0, allow printing 0's
+              LD  R5, De_ASCII   ; R5 = -48
+              NOT R5, R5
+              ADD R5, R5, #1     ; R5 = 48
+              ADD R0, R0, R5  
+              OUT
+              LD  R7, SAVE_2
+              JMP R7
+
+
+ 
+SAVE        .BLKW x0001
+SAVE_2      .BLKW x0001
+sign        .BLKW x0001
+tmp         .BLKW x0001
+To_ASCII    .FILL #48
+De_ASCII    .FILL #-48
+VANJ        .FILL #10000
+THOUSAND    .FILL #1000
+HUNDRED     .FILL #100
+TEN         .FILL #10
+flag        .BLKW x0001
+tmp2        .BLKW x0001  
+tmp3        .BLKW x0001
+four_dig    .FILL #3276
+error       .STRINGZ "Invalid input, please enter again: "  
+exceed      .STRINGZ "Inputed number is Out of Range, please enter again: "
+
+.END
+
+
+
+
+
+
+
+
