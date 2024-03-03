@@ -5,11 +5,21 @@
 .ORIG x3000
 inp       .STRINGZ "Please input a positive number: "
 bin       .STRINGZ "The Binary representation of the inputed number: "
+sext      .STRINGZ "Add leading 0?\nEnter 1 for (Yes), 0 for (No):  "
+              AND R0, R0, #0
+              ST  R0, flag
               LEA R0, inp
               PUTS 
               JSR INPUT
               ST  R6, num
 
+              LEA R0, sext
+              PUTS
+              JSR INPUT
+              LEA R7, #2
+              ADD R6, R6, #-1
+              BRz EXTEND
+              
               LEA R0, bin
               PUTS
               LD  R6, num
@@ -17,7 +27,10 @@ bin       .STRINGZ "The Binary representation of the inputed number: "
               JSR PRINT_BIN
               HALT
 
-
+EXTEND        AND R6, R6, #0
+              ADD R6, R6, #1
+              ST  R6, flag
+              RET
 
 DEC_2_BIN     ST  R7, SAVE
               AND R6, R6, #0
@@ -43,18 +56,26 @@ PRINT_BIN     ST  R7, SAVE
               LD  R5, LSB
               ADD R5, R5, #15
 
-Print_loop    LDR R0, R5, #0       ; Load the MSB to R0
-              LD  R6, To_ASCII     
+Print_loop    ADD R5, R5, #-1      ; Next binary bit (Left to right)
+              LDR R0, R5, #0       ; Load the MSB to R0
+              BRz CHECK
+              AND R6, R6, #0
+              ADD R6, R6, #1
+              ST  R6, flag         ; flag always = 1 if first '1' encounter
+CONTINUE      LD  R6, To_ASCII     
               ADD R0, R0, R6       ; Convert to R0 to ASCII
               OUT                  ; Print out
-              ADD R5, R5, #-1      ; Next binary bit (Left to right)
               LD  R6, LSB
               NOT R6, R6
               ADD R6, R6, #1
               ADD R6, R5, R6       ; R6 = R5 - x4000 < 0 ? EXIT
-              BRn EXIT 
+              BRnz EXIT 
               JSR Print_loop
-              
+
+CHECK         LD  R6, flag
+              BRz Print_loop
+              BR  CONTINUE
+
 
 ; R6 = Quotient, temp = Remainder
 R6_chia_2     AND R0, R0, #0          ; R0 = quotient counter
@@ -73,11 +94,13 @@ EXIT        LD  R7, SAVE
 num         .BLKW x0001
 temp        .BLKW x0001
 SAVE        .BLKW x0001
+flag        .BLKW x0001
 LSB         .FILL x4000
 To_ASCII    .FILL #48
 
 ;------------------------------------------------------------------------------------------------------
 INPUT       ST  R7, SAVE       ; Store return address
+            AND R6, R6, #0
 MAIN_LOOP   GETC      
             OUT
             ST  R0, tmp        ; Temporary save R0, to check for Newline character
